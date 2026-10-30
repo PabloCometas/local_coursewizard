@@ -210,12 +210,12 @@ const show = async(state, focus) => {
             question: step.question,
             answers: getStepAnswer(state, step, state.skipped.has(index)),
             explanation: state.explained.has(index) ? step.explanation : '',
-            fresh: animate && !explaining && index === state.current - 1 && !(index === state.lastrequired && state.decided),
+            fresh: animate && !explaining && index === state.answered,
             decision: index === state.lastrequired && hasoptional ? {
                 text: state.config.decision,
                 decided: state.decided,
                 answer: state.config.strings.moredetails,
-                fresh: animate && state.current === state.lastrequired + 1 && state.decided,
+                fresh: animate && state.answered === null && state.decided,
             } : null,
         })),
         question: atdecision ? '' : (isdone ? state.config.done : steps[state.current].question),
@@ -295,9 +295,6 @@ const show = async(state, focus) => {
     if (focus && atdecision) {
         state.history.querySelector('[data-action="create"]').focus();
     }
-    if (focus && choice) {
-        (state.quick.querySelector('[aria-pressed="true"]') || state.quick.firstElementChild)?.focus();
-    }
     if (focus && items.length) {
         // Visible fields only: an autocomplete keeps its original select hidden.
         const field = [...items[0].querySelectorAll('input:not([type="hidden"]), select, textarea, button')]
@@ -338,7 +335,22 @@ const next = (state) => {
         return;
     }
     state.skipped.delete(state.current);
-    state.current++;
+    goOn(state);
+};
+
+/**
+ * Goes to the next step, or after editing an earlier answer back to the step reached before.
+ *
+ * @param {Object} state
+ */
+const goOn = (state) => {
+    state.answered = state.current;
+    state.current = Math.max(state.current + 1, state.reached);
+    state.reached = state.current;
+    // Back past the decision and forward again: the optional details were chosen before.
+    if (state.current > state.lastrequired + 1) {
+        state.decided = true;
+    }
     state.animate = true;
     show(state, true);
 };
@@ -350,9 +362,7 @@ const next = (state) => {
  */
 const later = (state) => {
     state.skipped.add(state.current);
-    state.current++;
-    state.animate = true;
-    show(state, true);
+    goOn(state);
 };
 
 /**
@@ -396,6 +406,10 @@ export const init = (selector) => {
     state.decided = state.current > state.lastrequired;
     // Optional steps skipped with "Later".
     state.skipped = new Set();
+    // Furthest step so far: after editing an earlier answer, "Next" returns there.
+    state.reached = state.current;
+    // Step just answered, its answer slides in (null: "more details" chosen).
+    state.answered = null;
     // Steps whose explanation was asked for, it stays in the history.
     state.explained = new Set();
     // Set before show() to animate the answer and the reply (true) or the explanation ('explain'),
@@ -428,6 +442,7 @@ export const init = (selector) => {
             show(state, true);
         } else if (button.dataset.action === 'more') {
             state.decided = true;
+            state.answered = null;
             state.animate = true;
             show(state, true);
         } else if (button.dataset.action === 'back') {

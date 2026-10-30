@@ -99,17 +99,6 @@
     border-radius: 0.875rem;
 }
 
-.coursewizard-decision-body {
-    display: flex;
-    align-items: flex-start;
-}
-
-.coursewizard-decision-icon {
-    flex: 0 0 auto;
-    margin: 0.15rem 0.625rem 0 0;
-    font-size: 1.125rem;
-}
-
 .coursewizard-decision-text {
     margin: 0;
     line-height: 1.5;
@@ -118,7 +107,7 @@
 .coursewizard-choices {
     display: flex;
     flex-wrap: wrap;
-    margin: 0.75rem 0 0 1.75rem;
+    margin: 0.75rem 0 0;
 }
 
 .coursewizard-choices .btn {
@@ -187,20 +176,13 @@
     color: var(--primary, #0f6cbf);
 }
 
-.coursewizard-choice:hover,
-.coursewizard-choice:focus {
-    border-color: var(--primary, #0f6cbf);
+.coursewizard-choice:hover {
+    background-color: var(--coursewizard-soft);
 }
 
-/* The current value: filled, with a check mark at the end. */
+/* The current value: same button, light grey with a check mark, not stronger than other questions. */
 .coursewizard-choice[aria-pressed="true"] {
-    color: #fff;
-    background-color: var(--primary, #0f6cbf);
-    border-color: var(--primary, #0f6cbf);
-}
-
-.coursewizard-choice[aria-pressed="true"] .icon {
-    color: inherit;
+    background-color: var(--coursewizard-soft);
 }
 
 .coursewizard-choice[aria-pressed="true"]::after {
@@ -424,10 +406,6 @@
 
     .coursewizard-user {
         max-width: 90%;
-    }
-
-    .coursewizard-choices {
-        margin-left: 0;
     }
 
     .coursewizard-choices .btn,
