@@ -166,11 +166,23 @@ const validateStep = (state, step) => {
  */
 const getChoices = (state, step, index) => {
     const element = step.elements.length === 1 && step.elements[0].choices ? step.elements[0] : null;
-    if (element === null) {
-        return [];
-    }
+    return element === null ? [] : exportChoices(state, element, String(index));
+};
+
+/**
+ * Returns the choices of an element for local_coursewizard/choices.
+ *
+ * @param {Object} state
+ * @param {Object} element Element with choices: value, label, icon, image, url.
+ * @param {string} step Index of the step in the history, empty for the current step.
+ * @returns {Array}
+ */
+const exportChoices = (state, element, step) => {
     const current = state.form.elements[element.name].value;
-    return element.choices.map((choice) => ({...choice, index: index, name: element.name, selected: choice.value === current}));
+    // With images (templates) all choices are cards, so they line up.
+    const card = element.choices.some((choice) => choice.image !== '');
+    return element.choices.map((choice) => ({...choice, step: step, name: element.name, selected: choice.value === current,
+        card: card}));
 };
 
 /**
@@ -179,30 +191,15 @@ const getChoices = (state, step, index) => {
  * @param {Object} state
  * @param {Object|null} element Element with choices: value, label, icon. Null hides the buttons.
  */
-const showChoices = (state, element) => {
-    state.quick.replaceChildren();
+const showChoices = async(state, element) => {
     state.quick.hidden = element === null;
     if (element === null) {
+        state.quick.replaceChildren();
         return;
     }
-    const current = state.form.elements[element.name].value;
-    element.choices.forEach((choice) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'coursewizard-choice';
-        button.dataset.action = 'choose';
-        button.dataset.name = element.name;
-        button.dataset.value = choice.value;
-        button.setAttribute('aria-pressed', String(choice.value === current));
-        if (choice.icon) {
-            const icon = document.createElement('i');
-            icon.className = 'icon fa ' + choice.icon + ' fa-fw';
-            icon.setAttribute('aria-hidden', 'true');
-            button.append(icon);
-        }
-        button.append(choice.label);
-        state.quick.append(button);
-    });
+    const {html, js} = await Templates.renderForPromise('local_coursewizard/choices',
+        {choices: exportChoices(state, element, '')});
+    Templates.replaceNodeContents(state.quick, html, js);
 };
 
 /**
@@ -470,7 +467,7 @@ export const init = (selector) => {
             select.value = button.dataset.value;
             select.dispatchEvent(new Event('change', {bubbles: true}));
             // In the history only the value changes, the dialog stays at the current step.
-            if (button.dataset.step !== undefined && Number(button.dataset.step) !== state.current) {
+            if (button.dataset.step !== '' && Number(button.dataset.step) !== state.current) {
                 show(state, false);
             } else {
                 next(state);

@@ -24,7 +24,7 @@
     Context variables required for this template:
     * answered - Answered steps: index, question, explanation (if asked for),
       answers (label and value per field), choices (instead of answers: buttons
-      that stay, index, name, value, label, icon, selected), fresh (just answered,
+      that stay, see local_coursewizard/choices), fresh (just answered,
       slides in), decision (after the last required step while still open,
       otherwise null): text.
     * question - Question of the current step, empty while the decision is open.
@@ -61,12 +61,7 @@
     {{#explanation}}{{> local_coursewizard/bot_message }}{{/explanation}}
     {{#choices.0}}
         <div class="coursewizard-quick coursewizard-quick-answered{{#fresh}} coursewizard-fresh{{/fresh}}" role="group">
-            {{#choices}}
-                <button type="button" class="coursewizard-choice" data-action="choose" data-step="{{index}}"
-                        data-name="{{name}}" data-value="{{value}}" aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">
-                    {{#icon}}<i class="icon fa {{icon}} fa-fw" aria-hidden="true"></i>{{/icon}}{{label}}
-                </button>
-            {{/choices}}
+            {{> local_coursewizard/choices }}
         </div>
     {{/choices.0}}
     {{^choices.0}}

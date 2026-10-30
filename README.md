@@ -14,6 +14,12 @@ The short name is never asked: it is derived from the course name, and if it is 
 
 Technically, Moodle's own course form runs underneath the dialog (`classes/form/course_form.php`), and the dialog only shows the fields of the current step. Validation and saving are the same as in `course/edit.php`.
 
+## Course templates (optional)
+
+If [local_coursetemplatewizard](https://github.com/oncampus/moodle-local_coursetemplatewizard) by oncampus is installed and its template category contains courses, the dialog asks as first optional question whether to start from a template or with an empty course ("Empty course" is preselected). The templates are shown as cards with their course image and a "View" link. When the course is opened, it is created as usual and then filled with the chosen template by local_coursetemplatewizard: contents and course format come from the template, name, category, visibility, enrolments and the description and image given in the dialog are kept.
+
+The question is only shown to users who may use templates (`local/coursetemplatewizard:use` in the category, or for the role a creator gets in the new course). Without that plugin, the dialog works as before.
+
 ## Settings
 
 Site administration → Plugins → Local plugins → Course wizard:
@@ -30,7 +36,7 @@ English and German (informal "du"). All texts are language strings in `lang/`.
 
 ## Principles
 
-- Builds on Moodle core only (course form and `create_course()`), no dependency on other cometas plugins.
+- Builds on Moodle core only (course form and `create_course()`), no dependency on other cometas plugins. local_coursetemplatewizard is used only if installed.
 - No database tables of its own, the plugin only creates ordinary courses.
 - Possible later: merge into `local_courseadmin`, AI suggestions for single answers.
 

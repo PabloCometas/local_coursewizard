@@ -29,6 +29,7 @@ require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/course/edit_form.php');
 
 use local_coursewizard\form\course_form;
+use local_coursewizard\local\templates;
 
 $categoryid = optional_param('category', 0, PARAM_INT);
 
@@ -82,7 +83,16 @@ if ($editform->is_cancelled()) {
         enrol_try_internal_enrol($course->id, $USER->id, $CFG->creatornewroleid);
     }
 
-    redirect(new moodle_url('/course/view.php', ['id' => $course->id]));
+    $courseurl = new moodle_url('/course/view.php', ['id' => $course->id]);
+    if (empty($data->templateid)) {
+        redirect($courseurl);
+    }
+
+    // Fill the new course with the chosen template (local_coursetemplatewizard), then open it.
+    $template = get_course($data->templateid);
+    templates::apply($course, (int) $template->id);
+    redirect($courseurl, get_string('templateapplied', 'local_coursewizard', format_string($template->fullname)),
+        null, \core\output\notification::NOTIFY_SUCCESS);
 }
 
 $PAGE->set_primary_active_tab('home');

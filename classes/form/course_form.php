@@ -28,6 +28,8 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/course/edit_form.php');
 
+use local_coursewizard\local\templates;
+
 /**
  * Moodle's course edit form (course/edit_form.php) with all fields, defaults and
  * Moodle's own validation. The dialog (amd/src/wizard.js) only shows the fields of
@@ -41,6 +43,7 @@ class course_form extends \course_edit_form {
     public const STEPS = [
         'fullname' => ['fullname'],
         'category' => ['category'],
+        'template' => ['templateid'],
         'dates' => ['startdate', 'enddate'],
         'summary' => ['summary_editor'],
         'image' => ['overviewfiles_filemanager'],
@@ -56,6 +59,9 @@ class course_form extends \course_edit_form {
     public const CHOICES = [
         'visible' => ['1' => 'fa-eye', '0' => 'fa-eye-slash'],
     ];
+
+    /** @var array Course templates offered in the dialog, see templates::get_courses(). */
+    protected $templates = [];
 
     /** @var array Elements the dialog fills in itself and never shows. */
     public const AUTOMATIC = ['shortname'];
@@ -79,6 +85,34 @@ class course_form extends \course_edit_form {
         if ($mform->elementExists('category') && $mform->getElement('category')->getType() !== 'hidden') {
             $mform->getElement('category')->setLabel(get_string('category', 'local_coursewizard'));
         }
+
+        // Start from a template instead of an empty course, only if there are templates at all.
+        $this->templates = templates::get_courses(\context_coursecat::instance($this->_customdata['category']->id));
+        if ($this->templates) {
+            $options = [0 => get_string('emptycourse', 'local_coursewizard')];
+            foreach ($this->templates as $template) {
+                $options[$template->id] = $template->fullname;
+            }
+            $element = $mform->createElement('select', 'templateid', get_string('template', 'local_coursewizard'), $options);
+            $mform->insertElementBefore($element, 'buttonar');
+            $mform->setType('templateid', PARAM_INT);
+            $mform->setDefault('templateid', 0);
+        }
+    }
+
+    /**
+     * Only templates offered in the dialog can be chosen.
+     *
+     * @param array $data
+     * @param array $files
+     * @return array Errors.
+     */
+    public function validation($data, $files) {
+        $errors = parent::validation($data, $files);
+        if (!empty($data['templateid']) && !in_array((int) $data['templateid'], array_column($this->templates, 'id'))) {
+            $errors['templateid'] = get_string('invaliddata', 'error');
+        }
+        return $errors;
     }
 
     /**
@@ -221,12 +255,21 @@ class course_form extends \course_edit_form {
             if ($name === 'category') {
                 $element['placeholder'] = get_string('searchcategory', 'local_coursewizard');
             }
+            // Templates: "Empty course" first, then one card per template with its image.
+            if ($name === 'templateid') {
+                $element['choices'] = [['value' => '0', 'label' => get_string('emptycourse', 'local_coursewizard'),
+                    'icon' => 'fa-file', 'image' => '', 'url' => '']];
+                foreach ($this->templates as $template) {
+                    $element['choices'][] = ['value' => (string) $template->id, 'label' => $template->fullname,
+                        'icon' => '', 'image' => $template->image, 'url' => $template->url];
+                }
+            }
             if (isset(self::CHOICES[$name]) && $type === 'select') {
                 $choices = [];
                 foreach ($mform->getElement($name)->_options as $option) {
                     $value = (string) $option['attr']['value'];
                     $choices[$value] = ['value' => $value, 'label' => trim(strip_tags($option['text'])),
-                        'icon' => self::CHOICES[$name][$value] ?? ''];
+                        'icon' => self::CHOICES[$name][$value] ?? '', 'image' => '', 'url' => ''];
                 }
                 // Order of self::CHOICES first (most common answer first), then any other options.
                 $element['choices'] = array_values(
