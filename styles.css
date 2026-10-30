@@ -21,29 +21,12 @@
     border-radius: 1rem;
 }
 
-/* Assistant: small avatar, text without bubble. */
+/* Questions: plain text without bubble. */
 .coursewizard-bot {
-    display: flex;
-    align-items: flex-start;
     margin-bottom: 1rem;
 }
 
-.coursewizard-avatar {
-    display: flex;
-    flex: 0 0 1.75rem;
-    align-items: center;
-    justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    margin-right: 0.75rem;
-    color: var(--primary, #0f6cbf);
-    font-size: 0.8125rem;
-    background-color: #e8f1fb;
-    border-radius: 50%;
-}
-
 .coursewizard-bot-text {
-    padding-top: 0.2rem;
     line-height: 1.55;
 }
 
@@ -344,7 +327,7 @@
 }
 
 /* A single text field blends into the input box. */
-.coursewizard-single .fitem.coursewizard-active input[type="text"].form-control {
+.coursewizard-single .fitem.coursewizard-active input[type="text"]:not([role="combobox"]).form-control {
     padding-left: 0;
     background: transparent;
     border: 0;
@@ -356,6 +339,76 @@
 .coursewizard-ready .coursewizard-form .form-select {
     border-color: var(--coursewizard-border);
     border-radius: 0.625rem;
+}
+
+/* Autocomplete (e.g. category): selection and search in one rounded field. */
+.coursewizard-ready .coursewizard-form .felement[data-fieldtype="autocomplete"] {
+    position: relative;
+    display: flex !important; /* Block in the vertical form. */
+    flex-wrap: nowrap !important; /* Moodle's .flex-wrap. */
+    align-items: center !important; /* Moodle's .align-items-start. */
+    padding: 0.25rem 2rem 0.25rem 0.375rem;
+    border: 1px solid #d5d9de;
+    border-radius: 0.625rem;
+}
+
+.coursewizard-ready .coursewizard-form .felement[data-fieldtype="autocomplete"]:focus-within {
+    border-color: var(--primary, #0f6cbf);
+}
+
+.coursewizard-ready .coursewizard-form .form-autocomplete-selection {
+    width: auto !important; /* Moodle's .w-100. */
+    flex: 0 1 auto;
+    min-height: 0;
+}
+
+.coursewizard-ready .coursewizard-form .form-autocomplete-selection .badge {
+    margin: 0.125rem !important;
+    padding: 0.375rem 0.75rem;
+    color: var(--primary, #0f6cbf) !important;
+    font-weight: 500;
+    background-color: #e8f1fb !important;
+    border: 0;
+    border-radius: 999px;
+    pointer-events: none; /* A click would remove the only selection. */
+}
+
+/* The "×" looks like "delete", choosing another entry replaces the selection anyway. */
+.coursewizard-ready .coursewizard-form .form-autocomplete-selection .badge > [aria-hidden="true"] {
+    display: none;
+}
+
+.coursewizard-ready .coursewizard-form .form-autocomplete-input {
+    position: static !important;
+    flex: 1 1 auto;
+    margin: 0 !important;
+}
+
+.coursewizard-ready .coursewizard-form .form-autocomplete-input input.form-control {
+    width: 100%;
+    padding-left: 0.5rem;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+.coursewizard-ready .coursewizard-form .form-autocomplete-downarrow {
+    top: 50%;
+    right: 0.625rem;
+    color: var(--coursewizard-muted);
+    font-size: 0.625rem;
+    transform: translateY(-50%);
+}
+
+.coursewizard-ready .coursewizard-form .form-autocomplete-suggestions {
+    /* Moodle positions it below the search input (Popper, inline style). */
+    inset: 100% 0 auto 0 !important;
+    width: auto;
+    transform: none !important;
+    margin-top: 0.25rem;
+    border-color: var(--coursewizard-border);
+    border-radius: 0.625rem;
+    box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.08);
 }
 
 .coursewizard-ready .coursewizard-form .tox-tinymce,

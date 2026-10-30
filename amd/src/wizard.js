@@ -183,6 +183,13 @@ const show = async(state, focus) => {
     }
     const items = names.map(getItem).filter((item) => item !== null);
     items.forEach((item) => item.classList.add(ACTIVE));
+    (isdone || atdecision ? [] : steps[state.current].elements).filter((element) => element.placeholder)
+        .forEach((element) => {
+            const input = getItem(element.name)?.querySelector('input[role="combobox"]');
+            if (input) {
+                input.placeholder = element.placeholder;
+            }
+        });
     // A single field needs no label next to the question; text fields show it as placeholder.
     state.form.classList.toggle(SINGLE, items.length === 1 && !isdone);
     if (items.length === 1 && !isdone) {
@@ -207,7 +214,9 @@ const show = async(state, focus) => {
         state.history.querySelector('[data-action="create"]').focus();
     }
     if (focus && items.length) {
-        const field = items[0].querySelector('input:not([type="hidden"]), select, textarea, button');
+        // Visible fields only: an autocomplete keeps its original select hidden.
+        const field = [...items[0].querySelectorAll('input:not([type="hidden"]), select, textarea, button')]
+            .find((node) => node.offsetParent !== null);
         if (field) {
             field.focus();
         }

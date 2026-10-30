@@ -17,13 +17,12 @@
 {{!
     @template local_coursewizard/bot_message
 
-    A message of the assistant: small avatar, text without bubble.
+    A message of the assistant: plain text without bubble or avatar.
     Used as partial inside a section whose value is the text (implicit iterator).
 
     Example context (json):
     "Wie soll dein neuer Kurs heissen?"
 }}
 <div class="coursewizard-bot">
-    <span class="coursewizard-avatar" aria-hidden="true"><i class="icon fa fa-wand-magic-sparkles fa-fw m-0"></i></span>
     <div class="coursewizard-bot-text">{{.}}</div>
 </div>

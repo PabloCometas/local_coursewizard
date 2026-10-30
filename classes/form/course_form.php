@@ -197,6 +197,10 @@ class course_form extends \course_edit_form {
             }
             $label = trim(strip_tags((string) $mform->getElement($name)->getLabel()));
             $element = ['name' => $name, 'type' => $type, 'label' => $label, 'requiredmessage' => ''];
+            // Moodle's "Search" does not say that a category is already selected and can be changed.
+            if ($name === 'category') {
+                $element['placeholder'] = get_string('searchcategory', 'local_coursewizard');
+            }
             if ($mform->isElementRequired($name)) {
                 $element['requiredmessage'] = get_string('required');
                 foreach ($mform->_rules[$name] ?? [] as $rule) {
