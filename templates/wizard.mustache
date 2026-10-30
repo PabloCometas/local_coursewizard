@@ -28,7 +28,7 @@
 
     Example context (json):
     {
-        "greeting": "Hallo Anna! Ich helfe Ihnen, Schritt für Schritt einen neuen Kurs anzulegen.",
+        "greeting": "Hallo Anna! Ich helfe dir, Schritt für Schritt einen neuen Kurs anzulegen.",
         "config": "{\"steps\": [], \"errorstep\": null}",
         "form": "<form></form>",
         "classicurl": "https://example.com/course/edit.php?category=1"
@@ -41,6 +41,9 @@
         {{{form}}}
         <div class="coursewizard-nav" data-region="nav">
             <button type="button" class="btn btn-secondary" data-action="back">{{#str}}previous{{/str}}</button>
+            <button type="button" class="btn btn-outline-primary" data-action="create" hidden>
+                {{#str}}createnow, local_coursewizard{{/str}}
+            </button>
             <button type="button" class="btn btn-primary" data-action="next">{{#str}}next{{/str}}</button>
         </div>
     </div>

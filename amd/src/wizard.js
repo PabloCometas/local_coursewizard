@@ -155,11 +155,13 @@ const validateStep = (state, step) => {
 const show = async(state, focus) => {
     const steps = state.config.steps;
     const isdone = state.current >= steps.length;
+    const hasoptional = state.lastrequired < steps.length - 1;
     const context = {
         answered: steps.slice(0, state.current).map((step, index) => ({
             index: index,
             question: step.question,
             answer: getStepAnswer(state, step),
+            hint: hasoptional && index === state.lastrequired ? state.config.optionalhint : '',
         })),
         question: isdone ? state.config.done : steps[state.current].question,
     };
@@ -173,6 +175,7 @@ const show = async(state, focus) => {
 
     state.nav.querySelector('[data-action="back"]').hidden = state.current === 0;
     state.nav.querySelector('[data-action="next"]').hidden = isdone;
+    state.nav.querySelector('[data-action="create"]').hidden = isdone || state.current <= state.lastrequired;
 
     if (focus && items.length) {
         const field = items[0].querySelector('input:not([type="hidden"]), select, textarea, button');
@@ -184,13 +187,14 @@ const show = async(state, focus) => {
 };
 
 /**
- * Goes to the next step if the current one is complete.
+ * Checks the current step and fills in the short name.
  *
  * @param {Object} state
+ * @returns {boolean} True if the current step is complete.
  */
-const next = (state) => {
+const completeStep = (state) => {
     if (!validateStep(state, state.config.steps[state.current])) {
-        return;
+        return false;
     }
     // The short name is never asked. Moodle's own browser check needs a value,
     // the server replaces it with a unique one (course_form::unique_shortname()).
@@ -198,8 +202,32 @@ const next = (state) => {
     if (fullname && shortname) {
         shortname.value = fullname.value.trim().substring(0, 100);
     }
+    return true;
+};
+
+/**
+ * Goes to the next step if the current one is complete.
+ *
+ * @param {Object} state
+ */
+const next = (state) => {
+    if (!completeStep(state)) {
+        return;
+    }
     state.current++;
     show(state, true);
+};
+
+/**
+ * Creates the course right away, the remaining steps keep their defaults.
+ *
+ * @param {Object} state
+ */
+const create = (state) => {
+    if (!completeStep(state)) {
+        return;
+    }
+    state.form.requestSubmit(state.form.elements.saveanddisplay);
 };
 
 /**
@@ -219,6 +247,8 @@ export const init = (selector) => {
         history: root.querySelector('[data-region="history"]'),
         nav: root.querySelector('[data-region="nav"]'),
         current: config.errorstep === null ? 0 : config.errorstep,
+        // Required steps come first (course_form::get_wizard_config()).
+        lastrequired: config.steps.map((step) => step.required).lastIndexOf(true),
     };
     if (!state.form || !config.steps.length) {
         return;
@@ -231,6 +261,8 @@ export const init = (selector) => {
         }
         if (button.dataset.action === 'next') {
             next(state);
+        } else if (button.dataset.action === 'create') {
+            create(state);
         } else if (button.dataset.action === 'back') {
             state.current--;
             show(state, true);

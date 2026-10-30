@@ -44,7 +44,9 @@ require_capability('moodle/course:create', $catcontext);
 $PAGE->set_url(new moodle_url('/local/coursewizard/index.php', ['category' => $category->id]));
 $PAGE->set_context($catcontext);
 $PAGE->set_pagelayout('admin');
-$PAGE->set_secondary_active_tab('categorymain');
+// The dialog stands on its own: no category tabs, no page header (see styles.css).
+$PAGE->set_secondary_navigation(false);
+$PAGE->add_body_class('local-coursewizard-page');
 
 $returnurl = new moodle_url('/course/index.php', ['categoryid' => $category->id]);
 
@@ -83,15 +85,14 @@ if ($editform->is_cancelled()) {
     redirect(new moodle_url('/course/view.php', ['id' => $course->id]));
 }
 
-navigation_node::override_active_url(new moodle_url('/course/index.php', ['categoryid' => $category->id]), true);
 $PAGE->set_primary_active_tab('home');
-$PAGE->navbar->add(get_string('addnewcourse'));
 $PAGE->set_title(get_string('addnewcourse'));
 $PAGE->add_body_class('limitedwidth');
 $PAGE->set_heading(format_string($category->name));
 
 $config = $editform->get_wizard_config();
 $config['done'] = get_string('step_done', 'local_coursewizard', $USER->firstname);
+$config['optionalhint'] = get_string('optionalhint', 'local_coursewizard');
 $config['strings'] = [
     'none' => get_string('none'),
     'yes' => get_string('yes'),

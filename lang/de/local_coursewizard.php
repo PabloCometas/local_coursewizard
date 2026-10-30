@@ -26,7 +26,9 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['classicform'] = 'Lieber das klassische Formular verwenden';
 $string['coursename'] = 'Kursname';
+$string['createnow'] = 'Kurs jetzt anlegen';
 $string['greeting'] = 'Hallo {$a}! Ich helfe dir, Schritt für Schritt einen neuen Kurs anzulegen.';
+$string['optionalhint'] = 'Das Wichtigste ist erledigt. Du kannst den Kurs jetzt anlegen oder noch ein paar freiwillige Angaben machen.';
 $string['pluginname'] = 'Kursassistent';
 $string['privacy:metadata'] = 'Das Plugin Kursassistent speichert keine personenbezogenen Daten.';
 $string['step_category'] = 'In welcher Kategorie soll dein Kurs erscheinen?';

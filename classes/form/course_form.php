@@ -115,7 +115,8 @@ class course_form extends \course_edit_form {
      *
      * Steps without a usable element (e.g. no permission to choose the category) are
      * left out. Required fields Moodle needs in addition (e.g. required custom course
-     * fields) and fields with a validation error are asked in an extra step.
+     * fields) and fields with a validation error are asked in an extra step. Steps with
+     * a required field come first, after them the course can be created right away.
      *
      * @return array Steps and the index of the first step with a validation error (or null).
      */
@@ -144,6 +145,16 @@ class course_form extends \course_edit_form {
             $steps[] = ['key' => 'more', 'question' => get_string('step_more', 'local_coursewizard'),
                 'elements' => $elements];
         }
+
+        // Steps with a required field first: after them the course can be created right away.
+        foreach ($steps as &$step) {
+            $step['required'] = (bool) array_filter($step['elements'], fn($element) => $element['requiredmessage'] !== '');
+        }
+        unset($step);
+        $steps = array_merge(
+            array_values(array_filter($steps, fn($step) => $step['required'])),
+            array_values(array_filter($steps, fn($step) => !$step['required']))
+        );
 
         $errorstep = null;
         foreach ($steps as $index => $step) {

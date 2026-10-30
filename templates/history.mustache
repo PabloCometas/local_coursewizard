@@ -21,15 +21,15 @@
     answers, then the question of the current step.
 
     Context variables required for this template:
-    * answered - Answered steps: index, question, answer.
+    * answered - Answered steps: index, question, answer, hint (message after the answer, may be empty).
     * question - Question of the current step.
 
     Example context (json):
     {
         "answered": [
-            {"index": 0, "question": "Wie soll Ihr neuer Kurs heissen?", "answer": "Excel Grundlagen"}
+            {"index": 0, "question": "Wie soll dein neuer Kurs heissen?", "answer": "Excel Grundlagen", "hint": ""}
         ],
-        "question": "In welcher Kategorie soll Ihr Kurs erscheinen?"
+        "question": "In welcher Kategorie soll dein Kurs erscheinen?"
     }
 }}
 {{#answered}}
@@ -40,5 +40,8 @@
             {{#str}}edit{{/str}}
         </button>
     </div>
+    {{#hint}}
+        <div class="coursewizard-msg coursewizard-msg-bot">{{hint}}</div>
+    {{/hint}}
 {{/answered}}
 <div class="coursewizard-msg coursewizard-msg-bot">{{question}}</div>
