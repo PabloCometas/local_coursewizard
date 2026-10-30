@@ -571,6 +571,7 @@ const create = (state) => {
     if (!completeStep(state)) {
         return;
     }
+    state.sending = true;
     state.form.requestSubmit(state.form.elements.saveanddisplay);
 };
 
@@ -696,15 +697,28 @@ export const init = (selector) => {
         }
     });
 
-    // Enter in a text field goes to the next step instead of submitting the form.
+    // Enter in a text field or a select (e.g. day of a date) goes to the next step instead of submitting the form.
     state.form.addEventListener('keydown', (event) => {
         const target = event.target;
-        if (event.key === 'Enter' && target.matches('input[type="text"]:not([role="combobox"])') &&
-                state.current < config.steps.length) {
+        if (event.key === 'Enter' && target.matches('input:not([type="hidden"]):not([role="combobox"]), select') &&
+                !target.matches('input[type="submit"], input[type="button"]') && state.current < config.steps.length) {
             event.preventDefault();
             next(state);
         }
     });
+
+    // The form is only sent with Moodle's buttons of the last step or "Create course". Any other way (the
+    // browser sends it with its first button, Moodle's hidden "Update format") would reload the dialog.
+    state.form.addEventListener('click', (event) => {
+        if (event.target.closest('#fgroup_id_buttonar')) {
+            state.sending = true;
+        }
+    }, true);
+    state.form.addEventListener('submit', (event) => {
+        if (!state.sending) {
+            event.preventDefault();
+        }
+    }, true);
 
     // Enter in an autocomplete (e.g. category) with a closed list and no search text goes to the next step.
     // Capture phase: checked before Moodle's autocomplete reacts, otherwise choosing an entry would also go on.
