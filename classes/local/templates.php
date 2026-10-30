@@ -55,7 +55,8 @@ class templates {
      * course (course creators usually have it only there, as teacher).
      *
      * @param \context $context Context of the category of the new course.
-     * @return array Objects with id, fullname, image (URL), url (to view the template) and summary
+     * @return array Objects with id, fullname, image (URL, the pattern if there is none), courseimage
+     *     (URL of the course image, empty if there is none), url (to view the template) and summary
      *     (HTML to prefill the description, can be changed in the dialog).
      */
     public static function get_courses(\context $context): array {
@@ -82,6 +83,8 @@ class templates {
                 'summary' => file_rewrite_pluginfile_urls((string) $course->summary, 'pluginfile.php', $coursecontext->id,
                     'course', 'summary', null),
                 'image' => $image ?: course_summary_exporter::get_course_pattern($course),
+                // Only a real course image is copied into the new course (templates::apply()).
+                'courseimage' => $image ?: '',
                 'url' => (new \moodle_url('/course/view.php', ['id' => $course->id]))->out(false),
             ];
         }

@@ -232,7 +232,8 @@ class course_form extends \course_edit_form {
         $templates = [];
         foreach ($this->templates as $template) {
             $templates[] = ['value' => (string) $template->id, 'label' => $template->fullname, 'icon' => '',
-                'image' => $template->image, 'url' => $template->url, 'summary' => $template->summary];
+                'image' => $template->image, 'url' => $template->url, 'summary' => $template->summary,
+                'courseimage' => $template->courseimage];
         }
 
         return ['steps' => $steps, 'errorstep' => $errorstep, 'templates' => $templates];

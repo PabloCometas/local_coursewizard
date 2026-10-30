@@ -111,11 +111,41 @@ const getAnswer = (form, element, strings) => {
 const getStepAnswer = (state, step, skipped) => step.elements.map((element) => {
     const value = skipped ? state.config.strings.later
         : getAnswer(state.form, element, state.config.strings) || state.config.strings.none;
+    const images = skipped || element.type !== 'filemanager' ? [] : getImages(getItem(element.name));
+    // No own image at the image step: the course gets the image of the template (templates::apply()).
+    const template = step.key === 'image' && images.length === 0 ? getTemplateImage(state) : null;
+    if (template) {
+        return {label: element.label + ' ' + state.config.strings.imagefromtemplate, value: '',
+            images: [{src: template.courseimage, name: htmlToText(template.label)}]};
+    }
     return {
         label: element.label,
         value: value.length > MAXANSWER ? value.substring(0, MAXANSWER - 1) + '…' : value,
+        images: images,
     };
 });
+
+/**
+ * Returns the chosen template if it has a course image, which a course without own image gets.
+ *
+ * @param {Object} state
+ * @returns {Object|null} Template with courseimage and label.
+ */
+const getTemplateImage = (state) => {
+    const field = state.form.elements.templateid;
+    const template = field ? state.config.templates.find((choice) => choice.value === field.value) : null;
+    return template && template.courseimage ? template : null;
+};
+
+/**
+ * Returns the uploaded images of a file manager, for a small preview instead of the file name.
+ *
+ * @param {HTMLElement|null} item Form item of the file manager.
+ * @returns {Array} Objects with src (preview in the draft area) and name.
+ */
+const getImages = (item) => item ? [...item.querySelectorAll('.fp-thumbnail img')]
+    .filter((img) => img.src.includes('/draftfile.php/'))
+    .map((img) => ({src: img.src.replace('preview=thumb', 'preview=bigthumb'), name: img.alt})) : [];
 
 /**
  * Shows or hides Moodle's error message of an element.
@@ -282,11 +312,15 @@ const show = async(state, focus) => {
     const hasoptional = state.lastrequired < steps.length - 1;
     // After the last required step: create the course now or add the optional details.
     const atdecision = hasoptional && state.current === state.lastrequired + 1 && !state.decided;
+    // Image step with a template that has an image: shown, "Later" becomes "Use it".
+    const imagestep = !isdone && !atdecision && steps[state.current].key === 'image';
+    const templateimage = imagestep ? getTemplateImage(state) : null;
     const context = {
         answered: steps.slice(0, state.current).map((step, index) => ({
             index: index,
             question: step.question,
             answers: getStepAnswer(state, step, state.skipped.has(index)),
+            hasimages: getStepAnswer(state, step, state.skipped.has(index)).some((answer) => answer.images.length > 0),
             // Choices stay buttons in the history, the current value is pressed and can still be changed.
             choices: getChoices(state, step, index),
             explanation: state.explained.has(index) ? step.explanation : '',
@@ -297,6 +331,8 @@ const show = async(state, focus) => {
         question: atdecision ? '' : (isdone ? state.config.done : steps[state.current].question),
         explain: !atdecision && !isdone && !state.explained.has(state.current) && steps[state.current].explanation !== '',
         explanation: !atdecision && !isdone && state.explained.has(state.current) ? steps[state.current].explanation : '',
+        templateimage: imagestep && templateimage ? {src: templateimage.courseimage, text: state.config.strings.templateimage}
+            : null,
     };
     const {html, js} = await Templates.renderForPromise('local_coursewizard/history', context);
     if (render !== state.renders) {
@@ -347,6 +383,8 @@ const show = async(state, focus) => {
     state.back.hidden = state.current === 0;
     state.nav.querySelector('[data-action="next"]').hidden = choice !== null;
     // Choices always need a decision, so there is no "Later" next to them.
+    state.nav.querySelector('[data-action="later"]').textContent = templateimage
+        ? state.config.strings.usetemplateimage : state.config.strings.later;
     state.nav.querySelector('[data-action="later"]').hidden = isdone || atdecision || steps[state.current].required ||
         choice !== null;
     state.nav.hidden = isdone || choice !== null;

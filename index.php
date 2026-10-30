@@ -114,6 +114,9 @@ $config['decision'] = get_string('decision', 'local_coursewizard',
     (object) ['name' => $USER->firstname, 'details' => implode(', ', array_filter($details))]);
 $config['strings'] = [
     'later' => get_string('later', 'local_coursewizard'),
+    'imagefromtemplate' => get_string('imagefromtemplate', 'local_coursewizard'),
+    'templateimage' => get_string('templateimage', 'local_coursewizard'),
+    'usetemplateimage' => get_string('usetemplateimage', 'local_coursewizard'),
     'none' => get_string('none'),
     'yes' => get_string('yes'),
     'no' => get_string('no'),

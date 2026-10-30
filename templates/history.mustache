@@ -23,13 +23,16 @@
 
     Context variables required for this template:
     * answered - Answered steps: index, question, explanation (if asked for),
-      answers (label and value per field), choices (instead of answers: buttons
+      answers (label, value and images per field: preview of an uploaded image
+      instead of its name), hasimages (the answer is an image: picture over the full
+      width, label below), choices (instead of answers: buttons
       that stay, see local_coursewizard/choices), fresh (just answered,
       slides in), decision (after the last required step while still open,
       otherwise null): text.
     * question - Question of the current step, empty while the decision is open.
     * explain - Show the button "What is this for?" after the question.
     * explanation - Explanation of the current step, once asked for.
+    * templateimage - Image of the chosen template at the image step (src, text), or null.
 
     Example context (json):
     {
@@ -42,9 +45,11 @@
                 "answers": [
                     {
                         "label": "Course name",
-                        "value": "Excel basics"
+                        "value": "Excel basics",
+                        "images": []
                     }
                 ],
+                "hasimages": false,
                 "fresh": true,
                 "decision": {
                     "text": "Thanks, Anna! You have entered everything needed and can open your course now."
@@ -53,7 +58,8 @@
         ],
         "question": "",
         "explain": false,
-        "explanation": ""
+        "explanation": "",
+        "templateimage": null
     }
 }}
 {{#answered}}
@@ -65,12 +71,20 @@
         </div>
     {{/choices.0}}
     {{^choices.0}}
-    <div class="coursewizard-user{{#fresh}} coursewizard-fresh{{/fresh}}">
+    <div class="coursewizard-user{{#hasimages}} coursewizard-user-image{{/hasimages}}{{#fresh}} coursewizard-fresh{{/fresh}}">
         <span class="coursewizard-answers">
             {{#answers}}
                 <span class="coursewizard-answer">
-                    {{#label}}<span class="coursewizard-answer-label">{{label}}</span>{{/label}}
-                    <span class="coursewizard-answer-value">{{value}}</span>
+                    {{#images.0}}
+                        <span class="coursewizard-answer-images">
+                            {{#images}}<img src="{{src}}" alt="{{name}}" class="coursewizard-answer-image">{{/images}}
+                        </span>
+                        <span class="coursewizard-answer-label">{{label}}</span>
+                    {{/images.0}}
+                    {{^images.0}}
+                        {{#label}}<span class="coursewizard-answer-label">{{label}}</span>{{/label}}
+                        <span class="coursewizard-answer-value">{{value}}</span>
+                    {{/images.0}}
                 </span>
             {{/answers}}
         </span>
@@ -103,6 +117,12 @@
                     {{#str}}explain, local_coursewizard{{/str}}
                 </button>
             {{/explain}}
+            {{#templateimage}}
+                <span class="coursewizard-template-image">
+                    <img src="{{src}}" alt="">
+                    <span>{{text}}</span>
+                </span>
+            {{/templateimage}}
         </div>
     </div>
 {{/question}}
