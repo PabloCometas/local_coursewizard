@@ -161,8 +161,9 @@ const show = async(state, focus) => {
             index: index,
             question: step.question,
             answer: getStepAnswer(state, step),
-            hint: hasoptional && index === state.lastrequired ? state.config.optionalhint : '',
         })),
+        // Shown on every optional step, so it is always clear the course can be created now.
+        createnow: hasoptional && !isdone && state.current > state.lastrequired ? state.config.optionalhint : '',
         question: isdone ? state.config.done : steps[state.current].question,
     };
     const {html, js} = await Templates.renderForPromise('local_coursewizard/history', context);
@@ -175,7 +176,6 @@ const show = async(state, focus) => {
 
     state.nav.querySelector('[data-action="back"]').hidden = state.current === 0;
     state.nav.querySelector('[data-action="next"]').hidden = isdone;
-    state.nav.querySelector('[data-action="create"]').hidden = isdone || state.current <= state.lastrequired;
 
     if (focus && items.length) {
         const field = items[0].querySelector('input:not([type="hidden"]), select, textarea, button');

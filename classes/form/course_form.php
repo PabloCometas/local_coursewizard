@@ -47,6 +47,11 @@ class course_form extends \course_edit_form {
         'visible' => ['visible'],
     ];
 
+    /** @var array Steps that are only asked if enabled in the plugin settings: step key => setting. */
+    public const OPTIONALSTEPS = [
+        'dates' => 'askdates',
+    ];
+
     /** @var array Elements the dialog fills in itself and never shows. */
     public const AUTOMATIC = ['shortname'];
 
@@ -126,6 +131,10 @@ class course_form extends \course_edit_form {
         $steps = [];
         $used = self::AUTOMATIC;
         foreach (self::STEPS as $key => $names) {
+            // A disabled step keeps the defaults; required fields or errors in it are still asked in "more".
+            if (isset(self::OPTIONALSTEPS[$key]) && !get_config('local_coursewizard', self::OPTIONALSTEPS[$key])) {
+                continue;
+            }
             $used = array_merge($used, $names);
             if ($elements = $this->export_elements($names)) {
                 $steps[] = ['key' => $key, 'question' => get_string('step_' . $key, 'local_coursewizard'),

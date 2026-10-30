@@ -41,6 +41,39 @@
     text-decoration: underline;
 }
 
+/* After the required steps: create the course right away. */
+.coursewizard-create {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin: 1.5rem 0;
+    padding: 1.25rem 1.5rem;
+    border: 2px solid var(--primary, #0f6cbf);
+    border-radius: 1rem;
+    background-color: #f5f9fd;
+}
+
+.coursewizard-create-text {
+    flex: 1 1 260px;
+    margin: 0 1rem 0 0;
+    font-weight: bold;
+}
+
+.coursewizard-create .btn {
+    flex: 0 0 auto;
+}
+
+@media (max-width: 576px) {
+    .coursewizard-create-text {
+        margin: 0 0 1rem;
+    }
+
+    .coursewizard-create .btn {
+        width: 100%;
+    }
+}
+
 .coursewizard-input {
     margin-top: 1rem;
     padding: 1rem;
