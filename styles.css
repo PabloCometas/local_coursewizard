@@ -199,6 +199,13 @@
     display: none;
 }
 
+/* Choices (e-learning or event, visibility) stand directly in the chat, without frame. */
+.coursewizard-input.coursewizard-choosing,
+.coursewizard-input.coursewizard-choosing:focus-within {
+    padding: 0;
+    border: 0;
+}
+
 .coursewizard-input:focus-within {
     border-color: var(--primary, #0f6cbf);
 }

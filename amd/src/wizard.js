@@ -31,6 +31,7 @@ import {getInstanceForElementId} from 'editor_tiny/editor';
 const ACTIVE = 'coursewizard-active';
 const SINGLE = 'coursewizard-single';
 const COMPOSE = 'coursewizard-compose';
+const CHOOSING = 'coursewizard-choosing';
 const TYPING = 'coursewizard-typing-active';
 const APPEAR = 'coursewizard-appear';
 const VANISH = 'coursewizard-vanish';
@@ -408,6 +409,8 @@ const show = async(state, focus) => {
     // selections and other fields get a labelled "Next" button below them.
     const elements = isdone || atdecision ? [] : steps[state.current].elements;
     state.input.classList.toggle(COMPOSE, elements.length === 1 && elements[0].type === 'text');
+    // Choices stand directly in the chat, without the frame of an input box.
+    state.input.classList.toggle(CHOOSING, choice !== null);
     state.input.hidden = atdecision;
     state.back.hidden = state.current === 0;
     state.nav.querySelector('[data-action="next"]').hidden = choice !== null;
