@@ -34,7 +34,7 @@ const COMPOSE = 'coursewizard-compose';
 const TYPING = 'coursewizard-typing-active';
 const APPEAR = 'coursewizard-appear';
 const MAXANSWER = 160;
-const TYPINGDELAY = 650;
+const TYPINGDELAY = 400;
 
 /**
  * Returns the form item (label and field) of an element.
@@ -155,6 +155,38 @@ const validateStep = (state, step) => {
 };
 
 /**
+ * Shows the choices of a select as buttons, the current value is pressed.
+ *
+ * @param {Object} state
+ * @param {Object|null} element Element with choices: value, label, icon. Null hides the buttons.
+ */
+const showChoices = (state, element) => {
+    state.quick.replaceChildren();
+    state.quick.hidden = element === null;
+    if (element === null) {
+        return;
+    }
+    const current = state.form.elements[element.name].value;
+    element.choices.forEach((choice) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'coursewizard-choice';
+        button.dataset.action = 'choose';
+        button.dataset.name = element.name;
+        button.dataset.value = choice.value;
+        button.setAttribute('aria-pressed', String(choice.value === current));
+        if (choice.icon) {
+            const icon = document.createElement('i');
+            icon.className = 'icon fa ' + choice.icon + ' fa-fw';
+            icon.setAttribute('aria-hidden', 'true');
+            button.append(icon);
+        }
+        button.append(choice.label);
+        state.quick.append(button);
+    });
+};
+
+/**
  * Shows the current step: chat history, its fields and the navigation.
  *
  * @param {Object} state
@@ -206,7 +238,11 @@ const show = async(state, focus) => {
 
     state.form.querySelectorAll('.' + ACTIVE).forEach((node) => node.classList.remove(ACTIVE));
     let names = isdone ? ['buttonar'] : steps[state.current].elements.map((element) => element.name);
-    if (atdecision) {
+    // A single select with choices is answered with buttons in the chat, its dropdown stays hidden.
+    const choice = !isdone && !atdecision && steps[state.current].elements.length === 1 &&
+        steps[state.current].elements[0].choices ? steps[state.current].elements[0] : null;
+    showChoices(state, choice);
+    if (atdecision || choice) {
         names = [];
     }
     const items = names.map(getItem).filter((item) => item !== null);
@@ -234,6 +270,7 @@ const show = async(state, focus) => {
     state.input.hidden = atdecision;
     state.back.hidden = state.current === 0;
     state.nav.hidden = isdone;
+    state.nav.querySelector('[data-action="next"]').hidden = choice !== null;
     state.nav.querySelector('[data-action="later"]').hidden = isdone || atdecision || steps[state.current].required;
     // Visible on every optional step, so it is always clear the course can be created now.
     state.createnow.hidden = !hasoptional || isdone || atdecision || state.current <= state.lastrequired;
@@ -255,6 +292,9 @@ const show = async(state, focus) => {
 
     if (focus && atdecision) {
         state.history.querySelector('[data-action="create"]').focus();
+    }
+    if (focus && choice) {
+        (state.quick.querySelector('[aria-pressed="true"]') || state.quick.firstElementChild)?.focus();
     }
     if (focus && items.length) {
         // Visible fields only: an autocomplete keeps its original select hidden.
@@ -345,6 +385,7 @@ export const init = (selector) => {
         back: root.querySelector('[data-action="back"]'),
         createnow: root.querySelector('[data-region="createnow"]'),
         input: root.querySelector('[data-region="input"]'),
+        quick: root.querySelector('[data-region="quick"]'),
         current: config.errorstep === null ? 0 : config.errorstep,
         // Required steps come first (course_form::get_wizard_config()).
         lastrequired: config.steps.map((step) => step.required).lastIndexOf(true),
@@ -374,6 +415,11 @@ export const init = (selector) => {
             create(state);
         } else if (button.dataset.action === 'later') {
             later(state);
+        } else if (button.dataset.action === 'choose') {
+            const select = state.form.elements[button.dataset.name];
+            select.value = button.dataset.value;
+            select.dispatchEvent(new Event('change', {bubbles: true}));
+            next(state);
         } else if (button.dataset.action === 'explain') {
             state.explained.add(state.current);
             state.animate = 'explain';

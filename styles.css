@@ -161,6 +161,52 @@
     min-width: 0;
 }
 
+/* Choices as buttons in the chat (e.g. visibility), one click answers. */
+.coursewizard-quick {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.coursewizard-quick[hidden] {
+    display: none;
+}
+
+.coursewizard-choice {
+    display: flex;
+    align-items: center;
+    margin: 0 0.5rem 0.5rem 0;
+    padding: 0.625rem 1.125rem;
+    font-weight: 500;
+    background-color: #fff;
+    border: 1px solid #d5d9de;
+    border-radius: 0.875rem;
+}
+
+.coursewizard-choice .icon {
+    margin-right: 0.5rem;
+    color: var(--primary, #0f6cbf);
+}
+
+.coursewizard-choice:hover,
+.coursewizard-choice:focus {
+    border-color: var(--primary, #0f6cbf);
+}
+
+.coursewizard-choice[aria-pressed="true"] {
+    color: var(--primary, #0f6cbf);
+    background-color: #e8f1fb;
+    border-color: var(--primary, #0f6cbf);
+}
+
+/* Only "Later" is left next to the choices. */
+.coursewizard-quick:not([hidden]) + .coursewizard-nav {
+    margin-top: 0.25rem;
+}
+
+.coursewizard-nav .coursewizard-send[hidden] {
+    display: none;
+}
+
 .coursewizard-nav {
     display: flex;
     flex: 0 0 auto;
@@ -281,7 +327,7 @@
 
 /* The answer slides in from the right. */
 .coursewizard-fresh {
-    animation: coursewizard-slidein 0.3s ease-out both;
+    animation: coursewizard-slidein 0.2s ease-out both;
 }
 
 /* "Typing": three dots, then the reply. */
@@ -316,11 +362,11 @@
 }
 
 .coursewizard-appear {
-    animation: coursewizard-fadeup 0.35s ease-out both;
+    animation: coursewizard-fadeup 0.25s ease-out both;
 }
 
 .coursewizard-input.coursewizard-appear {
-    animation-delay: 0.1s;
+    animation-delay: 0.05s;
 }
 
 @keyframes coursewizard-slidein {

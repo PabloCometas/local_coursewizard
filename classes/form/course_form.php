@@ -52,6 +52,11 @@ class course_form extends \course_edit_form {
         'dates' => 'askdates',
     ];
 
+    /** @var array Selects answered with buttons in the chat instead of a dropdown: element => option value => icon. */
+    public const CHOICES = [
+        'visible' => ['1' => 'fa-eye', '0' => 'fa-eye-slash'],
+    ];
+
     /** @var array Elements the dialog fills in itself and never shows. */
     public const AUTOMATIC = ['shortname'];
 
@@ -215,6 +220,17 @@ class course_form extends \course_edit_form {
             // Moodle's "Search" does not say that a category is already selected and can be changed.
             if ($name === 'category') {
                 $element['placeholder'] = get_string('searchcategory', 'local_coursewizard');
+            }
+            if (isset(self::CHOICES[$name]) && $type === 'select') {
+                $choices = [];
+                foreach ($mform->getElement($name)->_options as $option) {
+                    $value = (string) $option['attr']['value'];
+                    $choices[$value] = ['value' => $value, 'label' => trim(strip_tags($option['text'])),
+                        'icon' => self::CHOICES[$name][$value] ?? ''];
+                }
+                // Order of self::CHOICES first (most common answer first), then any other options.
+                $element['choices'] = array_values(
+                    array_intersect_key(array_replace(self::CHOICES[$name], $choices), $choices) + $choices);
             }
             if ($mform->isElementRequired($name)) {
                 $element['requiredmessage'] = get_string('required');
