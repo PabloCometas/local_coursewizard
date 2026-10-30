@@ -84,6 +84,10 @@ class course_form extends \course_edit_form {
             $mform->getElement('category')->setLabel(get_string('category', 'local_coursewizard'));
         }
 
+        // Moodle 5.x shows the buttons as a bar fixed at the bottom of the screen. In the dialog they
+        // belong to the last step, the dialog has its own bar "Create course".
+        $mform->set_sticky_footer(null);
+
         // Start from a template instead of an empty course, only if there are templates at all.
         // Not a step of the dialog: a switch at its start shows them (amd/src/wizard.js).
         $this->templates = templates::get_courses(\context_coursecat::instance($this->_customdata['category']->id));
