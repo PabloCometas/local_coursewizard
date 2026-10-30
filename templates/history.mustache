@@ -22,8 +22,9 @@
     away, then the question of the current step.
 
     Context variables required for this template:
-    * answered - Answered steps: index, question, answer, decision (after the last
-      required step, otherwise null): text, decided (more details chosen), answer.
+    * answered - Answered steps: index, question, answers (label and value per
+      field), fresh (just answered, slides in), decision (after the last required
+      step, otherwise null): text, decided (more details chosen), answer, fresh.
     * question - Question of the current step, empty while the decision is open.
 
     Example context (json):
@@ -32,11 +33,18 @@
             {
                 "index": 0,
                 "question": "Wie soll dein neuer Kurs heissen?",
-                "answer": "Excel Grundlagen",
+                "answers": [
+                    {
+                        "label": "Kursname",
+                        "value": "Excel Grundlagen"
+                    }
+                ],
+                "fresh": true,
                 "decision": {
                     "text": "Danke, Anna! Du hast alles Nötige angegeben und kannst den Kurs jetzt anlegen.",
                     "decided": false,
-                    "answer": "Weitere Angaben machen"
+                    "answer": "Weitere Angaben machen",
+                    "fresh": false
                 }
             }
         ],
@@ -45,8 +53,15 @@
 }}
 {{#answered}}
     {{#question}}{{> local_coursewizard/bot_message }}{{/question}}
-    <div class="coursewizard-user">
-        <span class="coursewizard-answer">{{answer}}</span>
+    <div class="coursewizard-user{{#fresh}} coursewizard-fresh{{/fresh}}">
+        <span class="coursewizard-answers">
+            {{#answers}}
+                <span class="coursewizard-answer">
+                    {{#label}}<span class="coursewizard-answer-label">{{label}}</span>{{/label}}
+                    <span class="coursewizard-answer-value">{{value}}</span>
+                </span>
+            {{/answers}}
+        </span>
         <button type="button" class="coursewizard-edit" data-action="edit" data-step="{{index}}"
                 title="{{#str}}edit{{/str}}" aria-label="{{#str}}edit{{/str}}">
             <i class="icon fa fa-pen fa-fw m-0" aria-hidden="true"></i>
@@ -70,7 +85,7 @@
             {{/decided}}
         </div>
         {{#decided}}
-            <div class="coursewizard-user">
+            <div class="coursewizard-user{{#fresh}} coursewizard-fresh{{/fresh}}">
                 <span class="coursewizard-answer">{{answer}}</span>
             </div>
         {{/decided}}

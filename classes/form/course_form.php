@@ -59,6 +59,24 @@ class course_form extends \course_edit_form {
     protected const SKIPPEDTYPES = ['hidden', 'header', 'static', 'html', 'submit', 'button'];
 
     /**
+     * Moodle's course form with labels that fit the dialog.
+     */
+    public function definition() {
+        parent::definition();
+
+        $mform = $this->_form;
+
+        // Without a short name to tell apart, "Course full name" is needlessly long.
+        if ($mform->elementExists('fullname')) {
+            $mform->getElement('fullname')->setLabel(get_string('coursename', 'local_coursewizard'));
+        }
+        // Same word as in the question of the dialog.
+        if ($mform->elementExists('category') && $mform->getElement('category')->getType() !== 'hidden') {
+            $mform->getElement('category')->setLabel(get_string('category', 'local_coursewizard'));
+        }
+    }
+
+    /**
      * Apply Moodle's own post-processing, derive the short name and expand all sections.
      */
     public function definition_after_data() {
@@ -69,11 +87,6 @@ class course_form extends \course_edit_form {
         // Set before validation, so Moodle's required and unique checks see it.
         if ($this->is_submitted()) {
             $mform->_submitValues['shortname'] = self::unique_shortname((string) $mform->getSubmitValue('fullname'));
-        }
-
-        // Without a short name to tell apart, "Course full name" is needlessly long.
-        if ($mform->elementExists('fullname')) {
-            $mform->getElement('fullname')->setLabel(get_string('coursename', 'local_coursewizard'));
         }
 
         // The last step of the dialog creates and opens the course, same label as everywhere in the dialog.

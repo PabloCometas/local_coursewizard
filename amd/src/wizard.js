@@ -31,7 +31,10 @@ import {getInstanceForElementId} from 'editor_tiny/editor';
 const ACTIVE = 'coursewizard-active';
 const SINGLE = 'coursewizard-single';
 const COMPOSE = 'coursewizard-compose';
+const TYPING = 'coursewizard-typing-active';
+const APPEAR = 'coursewizard-appear';
 const MAXANSWER = 160;
+const TYPINGDELAY = 650;
 
 /**
  * Returns the form item (label and field) of an element.
@@ -96,18 +99,21 @@ const getAnswer = (form, element, strings) => {
 };
 
 /**
- * Returns the answer of a step as one text.
+ * Returns the answers of a step, each with the label of its field.
  *
  * @param {Object} state
  * @param {Object} step
- * @returns {string}
+ * @param {boolean} skipped Skipped with "Later".
+ * @returns {Array} Objects with label and value.
  */
-const getStepAnswer = (state, step) => {
-    const answers = step.elements.map((element) => getAnswer(state.form, element, state.config.strings))
-        .filter((answer) => answer !== '');
-    const text = answers.length ? answers.join('\n') : state.config.strings.none;
-    return text.length > MAXANSWER ? text.substring(0, MAXANSWER - 1) + '…' : text;
-};
+const getStepAnswer = (state, step, skipped) => step.elements.map((element) => {
+    const value = skipped ? state.config.strings.later
+        : getAnswer(state.form, element, state.config.strings) || state.config.strings.none;
+    return {
+        label: element.label,
+        value: value.length > MAXANSWER ? value.substring(0, MAXANSWER - 1) + '…' : value,
+    };
+});
 
 /**
  * Shows or hides Moodle's error message of an element.
@@ -155,6 +161,10 @@ const validateStep = (state, step) => {
  * @param {boolean} focus Move the focus to the first field of the step.
  */
 const show = async(state, focus) => {
+    // Only after an answer: the answer slides in, then the reply follows after a short "typing" pause.
+    const animate = state.animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    state.animate = false;
+    const render = ++state.renders;
     const steps = state.config.steps;
     const isdone = state.current >= steps.length;
     const hasoptional = state.lastrequired < steps.length - 1;
@@ -164,17 +174,30 @@ const show = async(state, focus) => {
         answered: steps.slice(0, state.current).map((step, index) => ({
             index: index,
             question: step.question,
-            answer: state.skipped.has(index) ? state.config.strings.later : getStepAnswer(state, step),
+            answers: getStepAnswer(state, step, state.skipped.has(index)),
+            fresh: animate && index === state.current - 1 && !(index === state.lastrequired && state.decided),
             decision: index === state.lastrequired && hasoptional ? {
                 text: state.config.decision,
                 decided: state.decided,
                 answer: state.config.strings.moredetails,
+                fresh: animate && state.current === state.lastrequired + 1 && state.decided,
             } : null,
         })),
         question: atdecision ? '' : (isdone ? state.config.done : steps[state.current].question),
     };
     const {html, js} = await Templates.renderForPromise('local_coursewizard/history', context);
+    if (render !== state.renders) {
+        return;
+    }
     Templates.replaceNodeContents(state.history, html, js);
+    // The reply of the assistant: the next question or the decision box.
+    const reply = animate ? state.history.lastElementChild : null;
+    if (reply && !reply.classList.contains('coursewizard-user')) {
+        reply.hidden = true;
+        state.root.classList.add(TYPING);
+        state.history.insertAdjacentHTML('beforeend', '<div class="coursewizard-bot coursewizard-typing" aria-hidden="true">' +
+            '<span></span><span></span><span></span></div>');
+    }
 
     state.form.querySelectorAll('.' + ACTIVE).forEach((node) => node.classList.remove(ACTIVE));
     let names = isdone ? ['buttonar'] : steps[state.current].elements.map((element) => element.name);
@@ -209,6 +232,19 @@ const show = async(state, focus) => {
     state.nav.querySelector('[data-action="later"]').hidden = isdone || atdecision || steps[state.current].required;
     // Visible on every optional step, so it is always clear the course can be created now.
     state.createnow.hidden = !hasoptional || isdone || atdecision || state.current <= state.lastrequired;
+
+    if (reply && reply.hidden) {
+        await new Promise((resolve) => setTimeout(resolve, TYPINGDELAY));
+        if (render !== state.renders) {
+            return;
+        }
+        state.history.querySelector('.coursewizard-typing')?.remove();
+        reply.hidden = false;
+        reply.classList.add(APPEAR);
+        state.root.classList.remove(TYPING);
+        state.input.classList.add(APPEAR);
+        state.input.addEventListener('animationend', () => state.input.classList.remove(APPEAR), {once: true});
+    }
 
     if (focus && atdecision) {
         state.history.querySelector('[data-action="create"]').focus();
@@ -254,6 +290,7 @@ const next = (state) => {
     }
     state.skipped.delete(state.current);
     state.current++;
+    state.animate = true;
     show(state, true);
 };
 
@@ -265,6 +302,7 @@ const next = (state) => {
 const later = (state) => {
     state.skipped.add(state.current);
     state.current++;
+    state.animate = true;
     show(state, true);
 };
 
@@ -293,6 +331,7 @@ export const init = (selector) => {
     const config = JSON.parse(root.dataset.config);
     const state = {
         config: config,
+        root: root,
         form: root.querySelector('form'),
         history: root.querySelector('[data-region="history"]'),
         nav: root.querySelector('[data-region="nav"]'),
@@ -307,6 +346,9 @@ export const init = (selector) => {
     state.decided = state.current > state.lastrequired;
     // Optional steps skipped with "Later".
     state.skipped = new Set();
+    // Set before show() to animate the answer and the reply, counter drops outdated renders.
+    state.animate = false;
+    state.renders = 0;
     if (!state.form || !config.steps.length) {
         return;
     }
@@ -324,6 +366,7 @@ export const init = (selector) => {
             later(state);
         } else if (button.dataset.action === 'more') {
             state.decided = true;
+            state.animate = true;
             show(state, true);
         } else if (button.dataset.action === 'back') {
             // From the first optional step back to the decision, from there to the last required step.

@@ -42,7 +42,18 @@
     border-radius: 1.125rem;
 }
 
+/* One line per field: small grey label, then the value. */
 .coursewizard-answer {
+    display: block;
+}
+
+.coursewizard-answer-label {
+    margin-right: 0.375rem;
+    color: var(--coursewizard-muted);
+    font-size: 0.8125rem;
+}
+
+.coursewizard-answer-value {
     white-space: pre-line;
 }
 
@@ -245,6 +256,94 @@
 
 .coursewizard-create .btn {
     flex: 0 0 auto;
+}
+
+/* ==================== Animation after an answer ==================== */
+
+/* The answer slides in from the right. */
+.coursewizard-fresh {
+    animation: coursewizard-slidein 0.3s ease-out both;
+}
+
+/* "Typing": three dots, then the reply. */
+.coursewizard-typing {
+    display: flex;
+    align-items: center;
+    height: 1.55rem;
+}
+
+.coursewizard-typing span {
+    width: 0.4375rem;
+    height: 0.4375rem;
+    margin-right: 0.25rem;
+    background-color: #b8bec6;
+    border-radius: 50%;
+    animation: coursewizard-dot 1s ease-in-out infinite;
+}
+
+.coursewizard-typing span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.coursewizard-typing span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+/* While typing, the input waits below. */
+.coursewizard-typing-active .coursewizard-input,
+.coursewizard-typing-active .coursewizard-create {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.coursewizard-appear {
+    animation: coursewizard-fadeup 0.35s ease-out both;
+}
+
+.coursewizard-input.coursewizard-appear {
+    animation-delay: 0.1s;
+}
+
+@keyframes coursewizard-slidein {
+    from {
+        opacity: 0;
+        transform: translateX(1rem);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes coursewizard-fadeup {
+    from {
+        opacity: 0;
+        transform: translateY(0.5rem);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes coursewizard-dot {
+    0%,
+    60%,
+    100% {
+        opacity: 0.4;
+        transform: none;
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-0.25rem);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .coursewizard-fresh,
+    .coursewizard-appear {
+        animation: none;
+    }
 }
 
 @media (max-width: 576px) {
