@@ -17,10 +17,10 @@
 {{!
     @template local_coursewizard/wizard
 
-    Guided course creation dialog: chat history, Moodle's course form (only the
-    fields of the current step are shown), the step navigation and, once all
-    required steps are answered, a bar sticking to the bottom of the screen to
-    create the course right away.
+    Guided course creation dialog: progress, chat history, Moodle's course form
+    (only the fields of the current step are shown) in a chat-style input box,
+    and, once all required steps are answered, a bar sticking to the bottom of
+    the screen to create the course right away.
 
     Context variables required for this template:
     * greeting - Personal greeting, first message of the dialog.
@@ -37,22 +37,33 @@
     }
 }}
 <div id="local-coursewizard" class="coursewizard" data-config="{{config}}">
-    <div class="coursewizard-msg coursewizard-msg-bot">{{greeting}}</div>
-    <div data-region="history" aria-live="polite"></div>
-    <div class="coursewizard-input" data-region="input">
-        {{{form}}}
-        <div class="coursewizard-nav" data-region="nav">
-            <button type="button" class="btn btn-secondary" data-action="back">{{#str}}previous{{/str}}</button>
-            <button type="button" class="btn btn-primary" data-action="next">{{#str}}next{{/str}}</button>
+    <div class="coursewizard-frame">
+        <div class="coursewizard-progress">
+            <span class="coursewizard-progress-text" data-region="progresstext"></span>
+            <div class="coursewizard-progress-track"><div class="coursewizard-progress-bar" data-region="progressbar"></div></div>
+        </div>
+        {{#greeting}}{{> local_coursewizard/bot_message }}{{/greeting}}
+        <div data-region="history" aria-live="polite"></div>
+        <div class="coursewizard-input" data-region="input">
+            {{{form}}}
+            <div class="coursewizard-nav" data-region="nav">
+                <button type="button" class="btn btn-primary rounded-circle coursewizard-send" data-action="next"
+                        title="{{#str}}next{{/str}}" aria-label="{{#str}}next{{/str}}">
+                    <i class="icon fa fa-arrow-up fa-fw m-0" aria-hidden="true"></i>
+                </button>
+            </div>
+        </div>
+        <div class="coursewizard-footer">
+            <button type="button" class="btn btn-link coursewizard-back" data-action="back">
+                <i class="icon fa fa-arrow-left fa-fw" aria-hidden="true"></i>{{#str}}previous{{/str}}
+            </button>
+            <a class="coursewizard-classic" href="{{classicurl}}">{{#str}}classicform, local_coursewizard{{/str}}</a>
+        </div>
+        <div class="coursewizard-create" data-region="createnow" hidden>
+            <p class="coursewizard-create-text">{{#str}}optionalhint, local_coursewizard{{/str}}</p>
+            <button type="button" class="btn btn-primary rounded-pill" data-action="create">
+                {{#str}}createnow, local_coursewizard{{/str}}
+            </button>
         </div>
     </div>
-    <div class="coursewizard-create" data-region="createnow" hidden>
-        <p class="coursewizard-create-text">{{#str}}optionalhint, local_coursewizard{{/str}}</p>
-        <button type="button" class="btn btn-primary btn-lg" data-action="create">
-            {{#str}}createnow, local_coursewizard{{/str}}
-        </button>
-    </div>
-    <p class="coursewizard-classic">
-        <a href="{{classicurl}}">{{#str}}classicform, local_coursewizard{{/str}}</a>
-    </p>
 </div>

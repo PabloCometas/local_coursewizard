@@ -102,6 +102,7 @@ foreach ($config['steps'] as $step) {
 $config['decision'] = get_string('decision', 'local_coursewizard',
     (object) ['name' => $USER->firstname, 'details' => implode(', ', array_filter($details))]);
 $config['strings'] = [
+    'later' => get_string('later', 'local_coursewizard'),
     'moredetails' => get_string('moredetails', 'local_coursewizard'),
     'none' => get_string('none'),
     'yes' => get_string('yes'),

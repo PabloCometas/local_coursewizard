@@ -26,9 +26,11 @@
  */
 
 import Templates from 'core/templates';
+import {getString} from 'core/str';
 import {getInstanceForElementId} from 'editor_tiny/editor';
 
 const ACTIVE = 'coursewizard-active';
+const SINGLE = 'coursewizard-single';
 const MAXANSWER = 160;
 
 /**
@@ -162,7 +164,7 @@ const show = async(state, focus) => {
         answered: steps.slice(0, state.current).map((step, index) => ({
             index: index,
             question: step.question,
-            answer: getStepAnswer(state, step),
+            answer: state.skipped.has(index) ? state.config.strings.later : getStepAnswer(state, step),
             decision: index === state.lastrequired && hasoptional ? {
                 text: state.config.decision,
                 decided: state.decided,
@@ -170,9 +172,15 @@ const show = async(state, focus) => {
             } : null,
         })),
         question: atdecision ? '' : (isdone ? state.config.done : steps[state.current].question),
+        later: !isdone && !atdecision && !steps[state.current].required,
     };
     const {html, js} = await Templates.renderForPromise('local_coursewizard/history', context);
     Templates.replaceNodeContents(state.history, html, js);
+
+    const total = steps.length;
+    const position = Math.min(state.current + 1, total);
+    state.progresstext.textContent = await getString('progress', 'local_coursewizard', {current: position, total: total});
+    state.progressbar.style.width = Math.round((isdone ? total : state.current) / total * 100) + '%';
 
     state.form.querySelectorAll('.' + ACTIVE).forEach((node) => node.classList.remove(ACTIVE));
     let names = isdone ? ['buttonar'] : steps[state.current].elements.map((element) => element.name);
@@ -181,10 +189,18 @@ const show = async(state, focus) => {
     }
     const items = names.map(getItem).filter((item) => item !== null);
     items.forEach((item) => item.classList.add(ACTIVE));
+    // A single field needs no label next to the question; text fields show it as placeholder.
+    state.form.classList.toggle(SINGLE, items.length === 1 && !isdone);
+    if (items.length === 1 && !isdone) {
+        const label = items[0].querySelector('label');
+        items[0].querySelectorAll('input[type="text"]:not([placeholder])').forEach((input) => {
+            input.placeholder = label ? label.textContent.trim() : '';
+        });
+    }
 
     state.input.hidden = atdecision;
-    state.nav.querySelector('[data-action="back"]').hidden = state.current === 0;
-    state.nav.querySelector('[data-action="next"]').hidden = isdone;
+    state.back.hidden = state.current === 0;
+    state.nav.hidden = isdone;
     // Visible on every optional step, so it is always clear the course can be created now.
     state.createnow.hidden = !hasoptional || isdone || atdecision || state.current <= state.lastrequired;
 
@@ -228,6 +244,18 @@ const next = (state) => {
     if (!completeStep(state)) {
         return;
     }
+    state.skipped.delete(state.current);
+    state.current++;
+    show(state, true);
+};
+
+/**
+ * Skips an optional step, its fields keep their defaults. It can be answered later via "Edit".
+ *
+ * @param {Object} state
+ */
+const later = (state) => {
+    state.skipped.add(state.current);
     state.current++;
     show(state, true);
 };
@@ -260,6 +288,9 @@ export const init = (selector) => {
         form: root.querySelector('form'),
         history: root.querySelector('[data-region="history"]'),
         nav: root.querySelector('[data-region="nav"]'),
+        back: root.querySelector('[data-action="back"]'),
+        progresstext: root.querySelector('[data-region="progresstext"]'),
+        progressbar: root.querySelector('[data-region="progressbar"]'),
         createnow: root.querySelector('[data-region="createnow"]'),
         input: root.querySelector('[data-region="input"]'),
         current: config.errorstep === null ? 0 : config.errorstep,
@@ -268,6 +299,8 @@ export const init = (selector) => {
     };
     // A validation error in an optional step means the details were chosen before.
     state.decided = state.current > state.lastrequired;
+    // Optional steps skipped with "Later".
+    state.skipped = new Set();
     if (!state.form || !config.steps.length) {
         return;
     }
@@ -281,6 +314,8 @@ export const init = (selector) => {
             next(state);
         } else if (button.dataset.action === 'create') {
             create(state);
+        } else if (button.dataset.action === 'later') {
+            later(state);
         } else if (button.dataset.action === 'more') {
             state.decided = true;
             show(state, true);

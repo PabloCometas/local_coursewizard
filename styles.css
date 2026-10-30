@@ -8,65 +8,223 @@
 /* ==================== Dialog ==================== */
 
 .coursewizard {
-    max-width: 720px;
+    --coursewizard-border: #e6e8eb;
+    --coursewizard-soft: #f4f5f7;
+    --coursewizard-muted: #6a737d;
+    max-width: 640px;
 }
 
-.coursewizard-msg {
-    width: fit-content;
-    max-width: 85%;
-    margin-bottom: 0.75rem;
-    padding: 0.75rem 1rem;
+.coursewizard-frame {
+    padding: 1.25rem 1.5rem 1rem;
+    background-color: #fff;
+    border: 1px solid var(--coursewizard-border);
     border-radius: 1rem;
+}
+
+.coursewizard-progress {
+    margin-bottom: 1.5rem;
+}
+
+.coursewizard-progress-text {
+    display: block;
+    margin-bottom: 0.375rem;
+    color: var(--coursewizard-muted);
+    font-size: 0.8125rem;
+    text-align: right;
+}
+
+.coursewizard-progress-track {
+    height: 3px;
+    overflow: hidden;
+    background-color: var(--coursewizard-soft);
+    border-radius: 3px;
+}
+
+.coursewizard-progress-bar {
+    width: 0;
+    height: 100%;
+    background-color: var(--primary, #0f6cbf);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* Assistant: small avatar, text without bubble. */
+.coursewizard-bot {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.coursewizard-avatar {
+    display: flex;
+    flex: 0 0 1.75rem;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-right: 0.75rem;
+    color: var(--primary, #0f6cbf);
+    font-size: 0.8125rem;
+    background-color: #e8f1fb;
+    border-radius: 50%;
+}
+
+.coursewizard-bot-text {
+    padding-top: 0.2rem;
+    line-height: 1.55;
+}
+
+/* Answers: light pill on the right. */
+.coursewizard-user {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    max-width: 75%;
+    margin: 0 0 1.25rem auto;
+    padding: 0.5rem 0.875rem;
+    background-color: var(--coursewizard-soft);
+    border-radius: 1.125rem;
 }
 
 .coursewizard-answer {
     white-space: pre-line;
 }
 
-.coursewizard-msg-bot {
-    background-color: #f1f3f5;
-    border-bottom-left-radius: 0.25rem;
+.coursewizard-edit {
+    margin-left: 0.5rem;
+    padding: 0;
+    color: var(--coursewizard-muted);
+    font-size: 0.75rem;
+    background: none;
+    border: 0;
 }
 
-.coursewizard-msg-user {
-    margin-left: auto;
-    color: #fff;
-    background-color: var(--primary, #0f6cbf);
-    border-bottom-right-radius: 0.25rem;
+.coursewizard-edit:hover,
+.coursewizard-edit:focus {
+    color: var(--primary, #0f6cbf);
 }
 
-.coursewizard-msg-user .coursewizard-edit {
-    margin-left: 0.75rem;
-    color: inherit;
-    text-decoration: underline;
-}
-
-/* After the required steps: green info box "create now or add details?" (Moodle's .alert-success). */
+/* After the required steps: green info box "create now or add details?". */
 .coursewizard-decision {
-    margin: 1rem 0;
-    border-radius: 1rem;
+    margin: 0 0 1.25rem;
+    padding: 0.875rem 1rem;
+    color: #1e6b34;
+    background-color: #eef8f0;
+    border-radius: 0.875rem;
+}
+
+.coursewizard-decision-body {
+    display: flex;
+    align-items: flex-start;
+}
+
+.coursewizard-decision-icon {
+    flex: 0 0 auto;
+    margin: 0.15rem 0.625rem 0 0;
+    font-size: 1.125rem;
 }
 
 .coursewizard-decision-text {
     margin: 0;
-    font-weight: bold;
+    line-height: 1.5;
 }
 
 .coursewizard-choices {
     display: flex;
     flex-wrap: wrap;
-    margin-top: 1rem;
+    margin: 0.75rem 0 0 1.75rem;
 }
 
 .coursewizard-choices .btn {
     margin: 0 0.5rem 0.5rem 0;
+    padding: 0.4rem 1rem;
 }
 
-@media (max-width: 576px) {
-    .coursewizard-choices .btn {
-        width: 100%;
-        margin-right: 0;
-    }
+.coursewizard-choices .coursewizard-pill {
+    background-color: #fff;
+    border: 1px solid #d5d9de;
+}
+
+/* "Later" and similar quick answers below the question. */
+.coursewizard-chips {
+    display: flex;
+    flex-wrap: wrap;
+    margin: -0.25rem 0 1rem 2.5rem;
+}
+
+.coursewizard-chip {
+    margin: 0 0.5rem 0.5rem 0;
+    padding: 0.3rem 0.875rem;
+    color: inherit;
+    font-size: 0.8125rem;
+    background-color: #fff;
+    border: 1px solid var(--coursewizard-border);
+    border-radius: 999px;
+}
+
+.coursewizard-chip:hover,
+.coursewizard-chip:focus {
+    background-color: var(--coursewizard-soft);
+}
+
+/* Input box like a chat composer: fields of the step and the round send button. */
+.coursewizard-input {
+    display: flex;
+    align-items: flex-end;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    border: 1px solid #d5d9de;
+    border-radius: 1.375rem;
+}
+
+.coursewizard-input[hidden] {
+    display: none;
+}
+
+.coursewizard-input:focus-within {
+    border-color: var(--primary, #0f6cbf);
+}
+
+.coursewizard-input > form {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.coursewizard-nav {
+    flex: 0 0 auto;
+    margin-left: 0.5rem;
+}
+
+.coursewizard-send {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+}
+
+.coursewizard-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.5rem;
+    font-size: 0.8125rem;
+}
+
+.coursewizard-back {
+    padding: 0;
+    color: var(--coursewizard-muted);
+    font-size: inherit;
+}
+
+.coursewizard-back[hidden] {
+    visibility: hidden;
+    display: inline-block;
+}
+
+.coursewizard-classic {
+    margin-left: auto;
+    color: var(--coursewizard-muted);
 }
 
 /* After the required steps: create the course right away, always visible at the bottom. */
@@ -79,11 +237,11 @@
     align-items: center;
     justify-content: space-between;
     margin-top: 1rem;
-    padding: 1rem 1.5rem;
-    border: 2px solid var(--primary, #0f6cbf);
-    border-radius: 1rem;
+    padding: 0.625rem 0.625rem 0.625rem 1.25rem;
     background-color: #fff;
-    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--coursewizard-border);
+    border-radius: 999px;
+    box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.08);
 }
 
 .coursewizard-create[hidden] {
@@ -91,9 +249,10 @@
 }
 
 .coursewizard-create-text {
-    flex: 1 1 260px;
+    flex: 1 1 220px;
     margin: 0 1rem 0 0;
-    font-weight: bold;
+    color: var(--coursewizard-muted);
+    font-size: 0.875rem;
 }
 
 .coursewizard-create .btn {
@@ -101,40 +260,38 @@
 }
 
 @media (max-width: 576px) {
-    .coursewizard-create-text {
-        margin: 0 0 1rem;
+    .coursewizard-frame {
+        padding: 1rem;
     }
 
+    .coursewizard-user {
+        max-width: 90%;
+    }
+
+    .coursewizard-choices {
+        margin-left: 0;
+    }
+
+    .coursewizard-choices .btn,
     .coursewizard-create .btn {
         width: 100%;
+        margin-right: 0;
     }
-}
 
-.coursewizard-input {
-    margin-top: 1rem;
-    padding: 1rem;
-    border: 1px solid #dee2e6;
-    border-radius: 1rem;
-}
+    .coursewizard-create {
+        border-radius: 1rem;
+    }
 
-.coursewizard-nav {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.coursewizard-nav .btn + .btn {
-    margin-left: 0.5rem;
-}
-
-.coursewizard-classic {
-    margin-top: 1rem;
-    font-size: 0.875rem;
+    .coursewizard-create-text {
+        margin: 0 0 0.5rem;
+    }
 }
 
 /* ==================== Moodle course form: only the current step ==================== */
 
 /* Without JavaScript the full Moodle form stays usable. */
-.coursewizard:not(.coursewizard-ready) .coursewizard-nav {
+.coursewizard:not(.coursewizard-ready) .coursewizard-nav,
+.coursewizard:not(.coursewizard-ready) .coursewizard-progress {
     display: none;
 }
 
@@ -161,5 +318,52 @@
 }
 
 .coursewizard-ready .coursewizard-form .fitem.coursewizard-active {
-    margin-bottom: 0.5rem;
+    margin: 0.25rem 0;
+}
+
+.coursewizard-ready .coursewizard-form .fitem.coursewizard-active + .fitem.coursewizard-active {
+    margin-top: 0.75rem;
+}
+
+/* One field per step: field and send button on one line, the question is the label. */
+.coursewizard-input:has(.coursewizard-single) {
+    align-items: center;
+}
+
+.coursewizard-ready .coursewizard-single .fitem.coursewizard-active {
+    margin: 0 !important; /* Moodle's .mb-3. */
+}
+
+.coursewizard-single .fitem.coursewizard-active > .felement {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.coursewizard-single .fitem.coursewizard-active > .col-form-label {
+    display: none !important;
+}
+
+/* A single text field blends into the input box. */
+.coursewizard-single .fitem.coursewizard-active input[type="text"].form-control {
+    padding-left: 0;
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+}
+
+.coursewizard-ready .coursewizard-form .form-control,
+.coursewizard-ready .coursewizard-form .custom-select,
+.coursewizard-ready .coursewizard-form .form-select {
+    border-color: var(--coursewizard-border);
+    border-radius: 0.625rem;
+}
+
+.coursewizard-ready .coursewizard-form .tox-tinymce,
+.coursewizard-ready .coursewizard-form .filemanager-container {
+    border-color: var(--coursewizard-border);
+    border-radius: 0.75rem;
+}
+
+.coursewizard-ready .coursewizard-form #fgroup_id_buttonar .btn {
+    border-radius: 999px;
 }
