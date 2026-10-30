@@ -361,6 +361,46 @@
     margin-right: 0;
 }
 
+/* Short explanation of a choice (e-learning or event) below the card on hover or keyboard focus. */
+.coursewizard-option:has(.coursewizard-choice-tip) {
+    position: relative;
+}
+
+.coursewizard-choice-tip {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    z-index: 3;
+    width: 15rem;
+    padding: 0.625rem 0.75rem;
+    color: var(--coursewizard-muted);
+    font-size: 0.8125rem;
+    line-height: 1.45;
+    background-color: #fff;
+    border-radius: 0.625rem;
+    box-shadow: 0 0.25rem 1.25rem rgba(0, 0, 0, 0.12);
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease, visibility 0.15s ease;
+}
+
+.coursewizard-option:hover .coursewizard-choice-tip,
+.coursewizard-option:focus-within .coursewizard-choice-tip {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Wider than their label ("E-learning / blended"), so the text has some space left and right. */
+.coursewizard-quick:not(.coursewizard-templates .coursewizard-quick) .coursewizard-choice-card {
+    width: 13rem;
+}
+
+.coursewizard-quick:not(.coursewizard-templates .coursewizard-quick) .coursewizard-choice-card .coursewizard-choice-label {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+}
+
 .coursewizard-choice-card,
 .coursewizard-choice-card:hover,
 .coursewizard-choice-card[aria-pressed="true"] {
@@ -679,7 +719,8 @@
 
     .coursewizard-choice-card,
     .coursewizard-choice-card:hover,
-    .coursewizard-choice-card[aria-pressed="true"] {
+    .coursewizard-choice-card[aria-pressed="true"],
+    .coursewizard-quick:not(.coursewizard-templates .coursewizard-quick) .coursewizard-choice-card {
         width: 100%;
     }
 

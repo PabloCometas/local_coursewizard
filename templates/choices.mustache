@@ -22,7 +22,8 @@
 
     Context variables required for this template:
     * choices - step (index of the step in the history, empty for the current step),
-      name, value, label, icon, image, url (to view it), selected, card.
+      name, value, label, icon, image, url (to view it), selected, card, description
+      (short explanation shown on hover and keyboard focus, empty for none).
 
     Example context (json):
     {
@@ -36,7 +37,8 @@
                 "image": "",
                 "url": "",
                 "selected": true,
-                "card": true
+                "card": true,
+                "description": ""
             }
         ]
     }
@@ -45,6 +47,7 @@
     <span class="coursewizard-option">
         <button type="button" class="coursewizard-choice{{#card}} coursewizard-choice-card{{/card}}" data-action="choose"
                 data-step="{{step}}" data-name="{{name}}" data-value="{{value}}"
+                {{#description}}aria-describedby="coursewizard-tip-{{name}}-{{value}}-{{step}}"{{/description}}
                 aria-pressed="{{#selected}}true{{/selected}}{{^selected}}false{{/selected}}">
             {{#card}}
                 <span class="coursewizard-choice-thumb">
@@ -57,6 +60,9 @@
             {{/card}}
             <span class="coursewizard-choice-label">{{label}}</span>
         </button>
+        {{#description}}
+            <span class="coursewizard-choice-tip" role="tooltip" id="coursewizard-tip-{{name}}-{{value}}-{{step}}">{{description}}</span>
+        {{/description}}
         {{#url}}
             <a href="{{url}}" target="_blank" class="coursewizard-choice-view">{{#str}}viewtemplate, local_coursewizard{{/str}}</a>
         {{/url}}

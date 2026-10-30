@@ -77,6 +77,9 @@ class course_form extends \course_edit_form {
     /** @var array Choices shown as large cards instead of buttons. */
     public const CARDS = ['coursekind'];
 
+    /** @var array Steps explained on the choices (hover) instead of "What is this for?": element => string prefix. */
+    public const CHOICEHELP = ['coursekind' => 'kind'];
+
     /** @var array Course templates offered in the dialog, see templates::get_courses(). */
     protected $templates = [];
 
@@ -290,8 +293,9 @@ class course_form extends \course_edit_form {
                 (bool) array_filter($step['elements'], fn($element) => $element['requiredmessage'] !== '');
             // Only for a course or only for an event course, the dialog leaves out the others.
             $step['kind'] = self::KINDSTEPS[$step['key']] ?? '';
-            // Shown on request ("What is this for?") below the question.
-            $step['explanation'] = get_string('explain_' . $step['key'], 'local_coursewizard');
+            // Shown on request ("What is this for?") below the question, unless the choices explain themselves.
+            $choicehelp = array_intersect(array_column($step['elements'], 'name'), array_keys(self::CHOICEHELP));
+            $step['explanation'] = $choicehelp ? '' : get_string('explain_' . $step['key'], 'local_coursewizard');
         }
         unset($step);
         $steps = array_merge(
@@ -348,7 +352,11 @@ class course_form extends \course_edit_form {
                 foreach ($mform->getElement($name)->_options as $option) {
                     $value = (string) $option['attr']['value'];
                     $choices[$value] = ['value' => $value, 'label' => trim(strip_tags($option['text'])),
-                        'icon' => self::CHOICES[$name][$value] ?? '', 'image' => '', 'url' => ''];
+                        'icon' => self::CHOICES[$name][$value] ?? '', 'image' => '', 'url' => '', 'description' => ''];
+                    if (isset(self::CHOICEHELP[$name])) {
+                        $choices[$value]['description'] = get_string(self::CHOICEHELP[$name] . $value . '_help',
+                            'local_coursewizard');
+                    }
                 }
                 // Order of self::CHOICES first (most common answer first), then any other options.
                 $element['choices'] = array_values(
