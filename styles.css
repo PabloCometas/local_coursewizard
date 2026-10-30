@@ -586,7 +586,7 @@
 }
 
 .coursewizard-input.coursewizard-appear {
-    animation-delay: 0.05s;
+    animation-delay: 0.1s;
 }
 
 /* The offer after the required steps dissolves once more details are chosen. */
@@ -651,6 +651,21 @@
 }
 
 @media (max-width: 576px) {
+    /* Template cards: two next to each other. */
+    .coursewizard-option:has(.coursewizard-choice-card) {
+        width: calc(50% - 0.625rem);
+    }
+
+    .coursewizard-option:has(.coursewizard-choice-card):nth-child(2n) {
+        margin-right: 0;
+    }
+
+    .coursewizard-choice-card,
+    .coursewizard-choice-card:hover,
+    .coursewizard-choice-card[aria-pressed="true"] {
+        width: 100%;
+    }
+
     .coursewizard-frame {
         padding: 1rem;
     }
@@ -683,6 +698,10 @@
 
 /* ==================== Moodle course form: only the current step ==================== */
 
+/* Moodle's form uses Bootstrap utilities (.d-flex, .mb-3, .w-100 …) and Popper inline styles,
+   which set their values with !important or inline. They can only be overridden the same way. */
+/* stylelint-disable declaration-no-important */
+
 /* Without JavaScript the full Moodle form stays usable. */
 .coursewizard:not(.coursewizard-ready) .coursewizard-nav {
     display: none;
@@ -712,6 +731,8 @@
 
 .coursewizard-ready .coursewizard-form .fitem.coursewizard-active {
     margin: 0.25rem 0;
+    /* Scrolled into view above the bar "Create course" at the bottom of the screen. */
+    scroll-margin-bottom: 7rem;
 }
 
 .coursewizard-ready .coursewizard-form .fitem.coursewizard-active + .fitem.coursewizard-active {
@@ -832,3 +853,5 @@
 .coursewizard-ready .coursewizard-form #fgroup_id_buttonar .btn {
     border-radius: 999px;
 }
+
+/* stylelint-enable declaration-no-important */

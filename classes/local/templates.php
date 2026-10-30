@@ -31,7 +31,6 @@ use core_course\external\course_summary_exporter;
  * fills the new course with the chosen one. Without that plugin nothing changes.
  */
 class templates {
-
     /** @var string Capability of local_coursetemplatewizard to overwrite a course with a template. */
     public const CAPABILITY = 'local/coursetemplatewizard:use';
 
@@ -41,8 +40,10 @@ class templates {
      * @return int Id of the template category, 0 if templates are not available.
      */
     public static function get_categoryid(): int {
-        if (!class_exists('\local_coursetemplatewizard\template_utilization_manager') ||
-                !get_capability_info(self::CAPABILITY)) {
+        if (
+            !class_exists('\local_coursetemplatewizard\template_utilization_manager') ||
+            !get_capability_info(self::CAPABILITY)
+        ) {
             return 0;
         }
         return (int) get_config('local_coursetemplatewizard', 'templatecoursecategoryid');
@@ -80,8 +81,14 @@ class templates {
             $templates[] = (object) [
                 'id' => (int) $course->id,
                 'fullname' => format_string($course->fullname, true, ['context' => $coursecontext]),
-                'summary' => file_rewrite_pluginfile_urls((string) $course->summary, 'pluginfile.php', $coursecontext->id,
-                    'course', 'summary', null),
+                'summary' => file_rewrite_pluginfile_urls(
+                    (string) $course->summary,
+                    'pluginfile.php',
+                    $coursecontext->id,
+                    'course',
+                    'summary',
+                    null
+                ),
                 'image' => $image ?: course_summary_exporter::get_course_pattern($course),
                 // Only a real course image is copied into the new course (templates::apply()).
                 'courseimage' => $image ?: '',
@@ -137,9 +144,9 @@ class templates {
         } else {
             $fs->delete_area_files($context->id, 'course', 'overviewfiles', 0);
             foreach ($images as $image) {
-                $fs->create_file_from_string(['contextid' => $context->id, 'component' => 'course',
-                    'filearea' => 'overviewfiles', 'itemid' => 0, 'filepath' => '/', 'filename' => $image['filename']],
-                    $image['content']);
+                $file = ['contextid' => $context->id, 'component' => 'course', 'filearea' => 'overviewfiles',
+                    'itemid' => 0, 'filepath' => '/', 'filename' => $image['filename']];
+                $fs->create_file_from_string($file, $image['content']);
             }
         }
     }

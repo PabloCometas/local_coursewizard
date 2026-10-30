@@ -410,9 +410,15 @@ const show = async(state, focus) => {
         state.history.querySelector('[data-action="create"]').focus();
     }
     if (focus && items.length) {
+        // The text editor gets the focus in its writing area, not on its first menu button.
+        const editor = elements.length && elements[0].type === 'editor'
+            ? getInstanceForElementId('id_' + elements[0].name) : null;
         // Visible fields only: an autocomplete keeps its original select hidden.
-        const field = [...items[0].querySelectorAll('input:not([type="hidden"]), select, textarea, button')]
+        const field = editor ? null : [...items[0].querySelectorAll('input:not([type="hidden"]), select, textarea, button')]
             .find((node) => node.offsetParent !== null);
+        if (editor) {
+            editor.focus();
+        }
         if (field) {
             field.focus();
             // A suggested name (from the template) is selected: typing replaces it, Enter keeps it.
@@ -608,6 +614,13 @@ export const init = (selector) => {
         }
     });
 
+    // Moodle's message under a field ("Name missing") disappears as soon as it is changed.
+    state.form.addEventListener('input', (event) => {
+        if (event.target.name && document.getElementById('id_error_' + event.target.name)) {
+            setError(event.target.name, '');
+        }
+    });
+
     // Enter in a text field goes to the next step instead of submitting the form.
     state.form.addEventListener('keydown', (event) => {
         const target = event.target;
@@ -634,5 +647,6 @@ export const init = (selector) => {
     root.classList.add('coursewizard-ready');
     // After a server error the switch keeps the template chosen before.
     showTemplates(state, false);
-    show(state, config.errorstep !== null);
+    // The first question is ready to be answered: the cursor is in its field.
+    show(state, true);
 };

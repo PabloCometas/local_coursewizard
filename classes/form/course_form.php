@@ -38,7 +38,6 @@ use local_coursewizard\local\templates;
  * The short name is never asked: it is derived from the full name and made unique.
  */
 class course_form extends \course_edit_form {
-
     /** @var array Dialog steps in order: step key => form elements shown in that step. */
     public const STEPS = [
         'fullname' => ['fullname'],
@@ -197,8 +196,10 @@ class course_form extends \course_edit_form {
         $more = [];
         foreach ($mform->_elements as $element) {
             $name = $element->getName();
-            if ($name !== '' && !in_array($name, $used) &&
-                    ($mform->isElementRequired($name) || $mform->getElementError($name))) {
+            if (
+                $name !== '' && !in_array($name, $used) &&
+                ($mform->isElementRequired($name) || $mform->getElementError($name))
+            ) {
                 $more[] = $name;
             }
         }
@@ -272,7 +273,8 @@ class course_form extends \course_edit_form {
                 }
                 // Order of self::CHOICES first (most common answer first), then any other options.
                 $element['choices'] = array_values(
-                    array_intersect_key(array_replace(self::CHOICES[$name], $choices), $choices) + $choices);
+                    array_intersect_key(array_replace(self::CHOICES[$name], $choices), $choices) + $choices
+                );
             }
             if ($mform->isElementRequired($name)) {
                 $element['requiredmessage'] = get_string('required');

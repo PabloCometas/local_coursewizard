@@ -49,7 +49,7 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_secondary_navigation(false);
 $PAGE->add_body_class('local-coursewizard-page');
 
-// "Cancel" leads back to the Dashboard, where creating a course usually starts.
+// Cancel leads back to the Dashboard, where creating a course usually starts.
 $returnurl = new moodle_url('/my/');
 
 $editoroptions = ['maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false,
@@ -90,10 +90,11 @@ if ($editform->is_cancelled()) {
     }
 
     // Fill the new course with the chosen template (local_coursetemplatewizard), then open it.
+    // The copy closes the session, so the message for the course page is stored before.
     $template = get_course($data->templateid);
+    \core\notification::success(get_string('templateapplied', 'local_coursewizard', format_string($template->fullname)));
     templates::apply($course, (int) $template->id);
-    redirect($courseurl, get_string('templateapplied', 'local_coursewizard', format_string($template->fullname)),
-        null, \core\output\notification::NOTIFY_SUCCESS);
+    redirect($courseurl);
 }
 
 $PAGE->set_primary_active_tab('home');
@@ -110,8 +111,11 @@ foreach ($config['steps'] as $step) {
         $details = array_merge($details, array_column($step['elements'], 'label'));
     }
 }
-$config['decision'] = get_string('decision', 'local_coursewizard',
-    (object) ['name' => $USER->firstname, 'details' => implode(', ', array_filter($details))]);
+$config['decision'] = get_string(
+    'decision',
+    'local_coursewizard',
+    (object) ['name' => $USER->firstname, 'details' => implode(', ', array_filter($details))]
+);
 $config['strings'] = [
     'later' => get_string('later', 'local_coursewizard'),
     'imagefromtemplate' => get_string('imagefromtemplate', 'local_coursewizard'),
