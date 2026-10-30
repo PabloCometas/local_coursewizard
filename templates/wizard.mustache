@@ -23,12 +23,14 @@
     the screen to create the course right away.
 
     Context variables required for this template:
+    * title - Page title, shown as the header line of the chat window.
     * greeting - Personal greeting, first message of the dialog.
     * config - JSON with the steps for amd/src/wizard.js.
     * form - Moodle's course form, rendered HTML.
 
     Example context (json):
     {
+        "title": "Add a new course",
         "greeting": "Hi Anna! I will help you create a new course, step by step.",
         "config": "{\"steps\": [], \"errorstep\": null}",
         "form": "<form></form>"
@@ -36,6 +38,7 @@
 }}
 <div id="local-coursewizard" class="coursewizard" data-config="{{config}}">
     <div class="coursewizard-frame">
+        <h2 class="coursewizard-title">{{title}}</h2>
         {{#greeting}}{{> local_coursewizard/bot_message }}{{/greeting}}
         <div data-region="history" aria-live="polite"></div>
         <div class="coursewizard-input" data-region="input">

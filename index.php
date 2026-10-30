@@ -111,8 +111,9 @@ $config['strings'] = [
 $PAGE->requires->js_call_amd('local_coursewizard/wizard', 'init', ['#local-coursewizard']);
 
 echo $OUTPUT->header();
-echo $OUTPUT->heading(get_string('addnewcourse'));
+// The title is the header line of the chat window (templates/wizard.mustache).
 echo $OUTPUT->render_from_template('local_coursewizard/wizard', [
+    'title' => get_string('addnewcourse'),
     'greeting' => get_string('greeting', 'local_coursewizard', $USER->firstname),
     'config' => json_encode($config),
     'form' => $editform->render(),
