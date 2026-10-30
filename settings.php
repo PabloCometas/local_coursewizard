@@ -35,5 +35,11 @@ if ($hassiteconfig) {
             new lang_string('askdates_desc', 'local_coursewizard'),
             0
         ));
+        $settings->add(new admin_setting_configcheckbox(
+            'local_coursewizard/events',
+            new lang_string('events', 'local_coursewizard'),
+            new lang_string('events_desc', 'local_coursewizard'),
+            0
+        ));
     }
 }

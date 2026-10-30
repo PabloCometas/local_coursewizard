@@ -45,6 +45,9 @@ class events {
     /**
      * Whether the current user can create event courses in a category.
      *
+     * Event courses are offered only if enabled in the plugin settings (many sites have no
+     * events with a date and place).
+     *
      * The capabilities are checked in the category, or for the role the creator gets in the
      * new course (course creators usually have them only there, as teacher).
      *
@@ -55,6 +58,7 @@ class events {
         global $CFG;
 
         if (
+            !get_config('local_coursewizard', 'events') ||
             !\core_component::get_component_directory('mod_facetoface') ||
             !file_exists($CFG->dirroot . '/mod/facetoface/lib.php') ||
             !enrol_is_enabled('guest') || get_config('enrol_guest', 'requirepassword') ||

@@ -344,6 +344,16 @@
     margin: 0 1.25rem 0.75rem 0;
 }
 
+/* Large choices in the chat (course or event) stand in the middle, also once answered. */
+.coursewizard-quick:has(.coursewizard-choice-card):not(.coursewizard-templates .coursewizard-quick) {
+    justify-content: center;
+    column-gap: 1.25rem;
+}
+
+.coursewizard-quick:has(.coursewizard-choice-card):not(.coursewizard-templates .coursewizard-quick) .coursewizard-option {
+    margin-right: 0;
+}
+
 .coursewizard-choice-card,
 .coursewizard-choice-card:hover,
 .coursewizard-choice-card[aria-pressed="true"] {
