@@ -269,9 +269,11 @@ const show = async(state, focus) => {
     state.input.classList.toggle(COMPOSE, elements.length === 1 && elements[0].type === 'text');
     state.input.hidden = atdecision;
     state.back.hidden = state.current === 0;
-    state.nav.hidden = isdone;
     state.nav.querySelector('[data-action="next"]').hidden = choice !== null;
-    state.nav.querySelector('[data-action="later"]').hidden = isdone || atdecision || steps[state.current].required;
+    // Choices always need a decision, so there is no "Later" next to them.
+    state.nav.querySelector('[data-action="later"]').hidden = isdone || atdecision || steps[state.current].required ||
+        choice !== null;
+    state.nav.hidden = isdone || choice !== null;
     // Visible on every optional step, so it is always clear the course can be created now.
     state.createnow.hidden = !hasoptional || isdone || atdecision || state.current <= state.lastrequired;
 
@@ -451,6 +453,19 @@ export const init = (selector) => {
             next(state);
         }
     });
+
+    // Enter in an autocomplete (e.g. category) with a closed list and no search text goes to the next step.
+    // Capture phase: checked before Moodle's autocomplete reacts, otherwise choosing an entry would also go on.
+    state.form.addEventListener('keydown', (event) => {
+        const target = event.target;
+        if (event.key === 'Enter' && target.matches('input[role="combobox"]') &&
+                target.getAttribute('aria-expanded') !== 'true' && target.value.trim() === '' &&
+                state.current < config.steps.length) {
+            event.preventDefault();
+            event.stopPropagation();
+            next(state);
+        }
+    }, true);
 
     root.classList.add('coursewizard-ready');
     show(state, config.errorstep !== null);

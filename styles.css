@@ -174,7 +174,7 @@
 .coursewizard-choice {
     display: flex;
     align-items: center;
-    margin: 0 0.5rem 0.5rem 0;
+    margin: 0 0.5rem 0 0;
     padding: 0.625rem 1.125rem;
     font-weight: 500;
     background-color: #fff;
@@ -192,17 +192,23 @@
     border-color: var(--primary, #0f6cbf);
 }
 
+/* The current value: filled, with a check mark at the end. */
 .coursewizard-choice[aria-pressed="true"] {
-    color: var(--primary, #0f6cbf);
-    background-color: #e8f1fb;
+    color: #fff;
+    background-color: var(--primary, #0f6cbf);
     border-color: var(--primary, #0f6cbf);
 }
 
-/* Only "Later" is left next to the choices. */
-.coursewizard-quick:not([hidden]) + .coursewizard-nav {
-    margin-top: 0.25rem;
+.coursewizard-choice[aria-pressed="true"] .icon {
+    color: inherit;
 }
 
+.coursewizard-choice[aria-pressed="true"]::after {
+    margin-left: 0.5rem;
+    content: "\2713";
+}
+
+.coursewizard-nav[hidden],
 .coursewizard-nav .coursewizard-send[hidden] {
     display: none;
 }
