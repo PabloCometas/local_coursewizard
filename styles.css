@@ -169,6 +169,16 @@
     display: none;
 }
 
+/* Answered: the buttons stay on the right, where answers are. */
+.coursewizard-quick-answered {
+    justify-content: flex-end;
+    margin-bottom: 1.25rem;
+}
+
+.coursewizard-quick-answered .coursewizard-choice:last-child {
+    margin-right: 0;
+}
+
 .coursewizard-choice {
     display: flex;
     align-items: center;

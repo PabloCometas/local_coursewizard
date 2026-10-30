@@ -155,6 +155,23 @@ const validateStep = (state, step) => {
 };
 
 /**
+ * Returns the choices of an answered step for the history, empty if the step has none.
+ *
+ * @param {Object} state
+ * @param {Object} step
+ * @param {number} index Index of the step.
+ * @returns {Array} Objects with index, name, value, label, icon, selected.
+ */
+const getChoices = (state, step, index) => {
+    const element = step.elements.length === 1 && step.elements[0].choices ? step.elements[0] : null;
+    if (element === null) {
+        return [];
+    }
+    const current = state.form.elements[element.name].value;
+    return element.choices.map((choice) => ({...choice, index: index, name: element.name, selected: choice.value === current}));
+};
+
+/**
  * Shows the choices of a select as buttons, the current value is pressed.
  *
  * @param {Object} state
@@ -209,6 +226,8 @@ const show = async(state, focus) => {
             index: index,
             question: step.question,
             answers: getStepAnswer(state, step, state.skipped.has(index)),
+            // Choices stay buttons in the history, the current value is pressed and can still be changed.
+            choices: getChoices(state, step, index),
             explanation: state.explained.has(index) ? step.explanation : '',
             fresh: animate && !explaining && index === state.answered,
             decision: index === state.lastrequired && hasoptional ? {
@@ -435,7 +454,12 @@ export const init = (selector) => {
             const select = state.form.elements[button.dataset.name];
             select.value = button.dataset.value;
             select.dispatchEvent(new Event('change', {bubbles: true}));
-            next(state);
+            // In the history only the value changes, the dialog stays at the current step.
+            if (button.dataset.step !== undefined && Number(button.dataset.step) !== state.current) {
+                show(state, false);
+            } else {
+                next(state);
+            }
         } else if (button.dataset.action === 'explain') {
             state.explained.add(state.current);
             state.animate = 'explain';
