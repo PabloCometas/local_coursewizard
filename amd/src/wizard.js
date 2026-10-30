@@ -203,6 +203,58 @@ const showChoices = async(state, element) => {
 };
 
 /**
+ * Chooses a template (or none: '0') and prefills the description with the one of the template.
+ * A description written in the dialog is never replaced.
+ *
+ * @param {Object} state
+ * @param {string} value Id of the template course, '0' for an empty course.
+ */
+const chooseTemplate = (state, value) => {
+    state.form.elements.templateid.value = value;
+    const template = state.config.templates.find((choice) => choice.value === value);
+    const summary = template ? template.summary : '';
+    const editor = getInstanceForElementId('id_summary_editor');
+    const textarea = state.form.elements['summary_editor[text]'];
+    const current = editor ? editor.getContent() : (textarea ? textarea.value : '');
+    if (htmlToText(current) !== '' && current !== state.prefilled) {
+        return;
+    }
+    if (editor) {
+        editor.setContent(summary);
+        state.prefilled = editor.getContent();
+    } else if (textarea) {
+        textarea.value = summary;
+        state.prefilled = summary;
+    }
+};
+
+/**
+ * Shows the switch "Create from a template" and, if it is on, the templates as cards.
+ *
+ * @param {Object} state
+ * @param {boolean} animate The cards fade in (the switch was just turned on).
+ */
+const showTemplates = async(state, animate) => {
+    const toggle = state.root.querySelector('[data-action="templates"]');
+    if (!toggle) {
+        return;
+    }
+    const current = state.form.elements.templateid.value;
+    const on = current !== '0' && current !== '';
+    toggle.setAttribute('aria-checked', String(on));
+    state.templates.hidden = !on;
+    if (!on) {
+        state.templates.replaceChildren();
+        return;
+    }
+    const choices = state.config.templates.map((choice) => ({...choice, step: 'template', name: 'templateid',
+        selected: choice.value === current, card: true}));
+    const {html, js} = await Templates.renderForPromise('local_coursewizard/choices', {choices: choices});
+    Templates.replaceNodeContents(state.templates, html, js);
+    state.templates.classList.toggle(APPEAR, animate);
+};
+
+/**
  * Shows the current step: chat history, its fields and the navigation.
  *
  * @param {Object} state
@@ -429,6 +481,7 @@ export const init = (selector) => {
         createnow: root.querySelector('[data-region="createnow"]'),
         input: root.querySelector('[data-region="input"]'),
         quick: root.querySelector('[data-region="quick"]'),
+        templates: root.querySelector('[data-region="templates"]'),
         current: config.errorstep === null ? 0 : config.errorstep,
         // Required steps come first (course_form::get_wizard_config()).
         lastrequired: config.steps.map((step) => step.required).lastIndexOf(true),
@@ -441,6 +494,8 @@ export const init = (selector) => {
     state.reached = state.current;
     // Step just answered, its answer slides in (null: "more details" chosen).
     state.answered = null;
+    // Description prefilled from a template, replaced when another template is chosen.
+    state.prefilled = '';
     // Steps whose explanation was asked for, it stays in the history.
     state.explained = new Set();
     // Set before show() to animate the answer and the reply (true) or the explanation ('explain'),
@@ -462,6 +517,14 @@ export const init = (selector) => {
             create(state);
         } else if (button.dataset.action === 'later') {
             later(state);
+        } else if (button.dataset.action === 'templates') {
+            // Switch at the start: off = empty course, on = the first template until another is chosen.
+            const on = button.getAttribute('aria-checked') !== 'true';
+            chooseTemplate(state, on ? state.config.templates[0].value : '0');
+            showTemplates(state, true);
+        } else if (button.dataset.action === 'choose' && button.dataset.step === 'template') {
+            chooseTemplate(state, button.dataset.value);
+            showTemplates(state, false);
         } else if (button.dataset.action === 'choose') {
             const select = state.form.elements[button.dataset.name];
             select.value = button.dataset.value;
@@ -516,5 +579,7 @@ export const init = (selector) => {
     }, true);
 
     root.classList.add('coursewizard-ready');
+    // After a server error the switch keeps the template chosen before.
+    showTemplates(state, false);
     show(state, config.errorstep !== null);
 };

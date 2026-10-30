@@ -159,6 +159,61 @@
     min-width: 0;
 }
 
+/* Small switch at the start: "Create from a template", the templates appear below it. */
+.coursewizard-templates {
+    margin: -0.25rem 0 1.25rem;
+}
+
+.coursewizard-toggle {
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    color: var(--coursewizard-muted);
+    font-size: 0.875rem;
+    background: none;
+    border: 0;
+}
+
+.coursewizard-toggle-track {
+    position: relative;
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 1.125rem;
+    margin-right: 0.5rem;
+    background-color: #d5d9de;
+    border-radius: 999px;
+    transition: background-color 0.2s ease;
+}
+
+.coursewizard-toggle-track::after {
+    position: absolute;
+    top: 0.125rem;
+    left: 0.125rem;
+    width: 0.875rem;
+    height: 0.875rem;
+    content: "";
+    background-color: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.coursewizard-toggle[aria-checked="true"] {
+    color: inherit;
+}
+
+.coursewizard-toggle[aria-checked="true"] .coursewizard-toggle-track {
+    background-color: var(--primary, #0f6cbf);
+}
+
+.coursewizard-toggle[aria-checked="true"] .coursewizard-toggle-track::after {
+    transform: translateX(0.875rem);
+}
+
+.coursewizard-templates .coursewizard-quick {
+    margin: 0.75rem 0 -0.5rem;
+}
+
 /* Choices as buttons in the chat (e.g. visibility), one click answers. */
 .coursewizard-quick {
     display: flex;

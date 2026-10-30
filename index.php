@@ -123,6 +123,7 @@ echo $OUTPUT->header();
 // The title is the header line of the chat window (templates/wizard.mustache).
 echo $OUTPUT->render_from_template('local_coursewizard/wizard', [
     'title' => get_string('addnewcourse'),
+    'hastemplates' => !empty($config['templates']),
     'greeting' => get_string('greeting', 'local_coursewizard', $USER->firstname),
     'config' => json_encode($config),
     'form' => $editform->render(),

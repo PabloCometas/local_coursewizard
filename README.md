@@ -16,7 +16,7 @@ Technically, Moodle's own course form runs underneath the dialog (`classes/form/
 
 ## Course templates (optional)
 
-If [local_coursetemplatewizard](https://github.com/oncampus/moodle-local_coursetemplatewizard) by oncampus is installed and its template category contains courses, the dialog asks as first optional question whether to start from a template or with an empty course ("Empty course" is preselected). The templates are shown as cards with their course image and a "View" link. When the course is opened, it is created as usual and then filled with the chosen template by local_coursetemplatewizard: contents and course format come from the template, name, category, visibility, enrolments and the description and image given in the dialog are kept.
+If [local_coursetemplatewizard](https://github.com/oncampus/moodle-local_coursetemplatewizard) by oncampus is installed and its template category contains courses, a small switch "Create from a template" appears below the greeting (off by default, i.e. an empty course). Turned on, the templates are shown as cards with their course image and a "View" link, the first one is selected. Choosing a template prefills the description step with the description of the template, which can be changed. When the course is opened, it is created as usual and then filled with the chosen template by local_coursetemplatewizard: contents and course format come from the template; name, category, visibility and enrolments are kept. Without an own description or image, those of the template are used.
 
 The question is only shown to users who may use templates (`local/coursetemplatewizard:use` in the category, or for the role a creator gets in the new course). Without that plugin, the dialog works as before.
 

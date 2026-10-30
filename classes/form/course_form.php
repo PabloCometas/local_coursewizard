@@ -43,7 +43,6 @@ class course_form extends \course_edit_form {
     public const STEPS = [
         'fullname' => ['fullname'],
         'category' => ['category'],
-        'template' => ['templateid'],
         'dates' => ['startdate', 'enddate'],
         'summary' => ['summary_editor'],
         'image' => ['overviewfiles_filemanager'],
@@ -87,6 +86,7 @@ class course_form extends \course_edit_form {
         }
 
         // Start from a template instead of an empty course, only if there are templates at all.
+        // Not a step of the dialog: a switch at its start shows them (amd/src/wizard.js).
         $this->templates = templates::get_courses(\context_coursecat::instance($this->_customdata['category']->id));
         if ($this->templates) {
             $options = [0 => get_string('emptycourse', 'local_coursewizard')];
@@ -228,7 +228,14 @@ class course_form extends \course_edit_form {
             }
         }
 
-        return ['steps' => $steps, 'errorstep' => $errorstep];
+        // Templates are not a step: a switch at the start of the dialog shows them.
+        $templates = [];
+        foreach ($this->templates as $template) {
+            $templates[] = ['value' => (string) $template->id, 'label' => $template->fullname, 'icon' => '',
+                'image' => $template->image, 'url' => $template->url, 'summary' => $template->summary];
+        }
+
+        return ['steps' => $steps, 'errorstep' => $errorstep, 'templates' => $templates];
     }
 
     /**
@@ -254,15 +261,6 @@ class course_form extends \course_edit_form {
             // Moodle's "Search" does not say that a category is already selected and can be changed.
             if ($name === 'category') {
                 $element['placeholder'] = get_string('searchcategory', 'local_coursewizard');
-            }
-            // Templates: "Empty course" first, then one card per template with its image.
-            if ($name === 'templateid') {
-                $element['choices'] = [['value' => '0', 'label' => get_string('emptycourse', 'local_coursewizard'),
-                    'icon' => 'fa-file', 'image' => '', 'url' => '']];
-                foreach ($this->templates as $template) {
-                    $element['choices'][] = ['value' => (string) $template->id, 'label' => $template->fullname,
-                        'icon' => '', 'image' => $template->image, 'url' => $template->url];
-                }
             }
             if (isset(self::CHOICES[$name]) && $type === 'select') {
                 $choices = [];

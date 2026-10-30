@@ -55,7 +55,8 @@ class templates {
      * course (course creators usually have it only there, as teacher).
      *
      * @param \context $context Context of the category of the new course.
-     * @return array Objects with id, fullname, image (URL) and url (to view the template).
+     * @return array Objects with id, fullname, image (URL), url (to view the template) and summary
+     *     (HTML to prefill the description, can be changed in the dialog).
      */
     public static function get_courses(\context $context): array {
         global $CFG, $DB;
@@ -74,9 +75,12 @@ class templates {
         $templates = [];
         foreach ($DB->get_records('course', ['category' => $categoryid], 'sortorder') as $course) {
             $image = course_summary_exporter::get_course_image($course);
+            $coursecontext = \context_course::instance($course->id);
             $templates[] = (object) [
                 'id' => (int) $course->id,
-                'fullname' => format_string($course->fullname, true, ['context' => \context_course::instance($course->id)]),
+                'fullname' => format_string($course->fullname, true, ['context' => $coursecontext]),
+                'summary' => file_rewrite_pluginfile_urls((string) $course->summary, 'pluginfile.php', $coursecontext->id,
+                    'course', 'summary', null),
                 'image' => $image ?: course_summary_exporter::get_course_pattern($course),
                 'url' => (new \moodle_url('/course/view.php', ['id' => $course->id]))->out(false),
             ];
@@ -89,8 +93,9 @@ class templates {
      *
      * local_coursetemplatewizard keeps name, short name, dates, visibility and enrolments of the
      * course and copies contents and course format of the template. The description and image
-     * given in the dialog are kept too. The copy runs right away (a few seconds), so its progress
-     * page and log output are not shown.
+     * given in the dialog are kept, without them those of the template are used (the dialog
+     * prefills the description of the template, so it can be changed). The copy runs right away
+     * (a few seconds), so its progress page and log output are not shown.
      *
      * @param \stdClass $course The new course.
      * @param int $templateid Id of the template course.
@@ -115,16 +120,39 @@ class templates {
             ob_end_clean();
         }
 
+        $template = get_course($templateid);
+        $templatecontext = \context_course::instance($templateid);
         if ($summary !== null) {
             update_course((object) ['id' => $course->id, 'summary' => $summary, 'summaryformat' => $course->summaryformat]);
+        } else {
+            self::copy_area($fs, $templatecontext, $context, 'summary');
+            update_course((object) ['id' => $course->id, 'summary' => $template->summary,
+                'summaryformat' => $template->summaryformat]);
         }
-        if ($images) {
+        if (!$images) {
+            self::copy_area($fs, $templatecontext, $context, 'overviewfiles');
+        } else {
             $fs->delete_area_files($context->id, 'course', 'overviewfiles', 0);
             foreach ($images as $image) {
                 $fs->create_file_from_string(['contextid' => $context->id, 'component' => 'course',
                     'filearea' => 'overviewfiles', 'itemid' => 0, 'filepath' => '/', 'filename' => $image['filename']],
                     $image['content']);
             }
+        }
+    }
+
+    /**
+     * Replaces the files of a course file area with those of another course.
+     *
+     * @param \file_storage $fs
+     * @param \context $from Context of the template.
+     * @param \context $to Context of the new course.
+     * @param string $filearea "summary" or "overviewfiles".
+     */
+    protected static function copy_area(\file_storage $fs, \context $from, \context $to, string $filearea): void {
+        $fs->delete_area_files($to->id, 'course', $filearea, 0);
+        foreach ($fs->get_area_files($from->id, 'course', $filearea, 0, 'filename', false) as $file) {
+            $fs->create_file_from_storedfile(['contextid' => $to->id], $file);
         }
     }
 }
