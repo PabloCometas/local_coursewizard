@@ -116,6 +116,5 @@ echo $OUTPUT->render_from_template('local_coursewizard/wizard', [
     'greeting' => get_string('greeting', 'local_coursewizard', $USER->firstname),
     'config' => json_encode($config),
     'form' => $editform->render(),
-    'classicurl' => (new moodle_url('/course/edit.php', ['category' => $category->id]))->out(false),
 ]);
 echo $OUTPUT->footer();

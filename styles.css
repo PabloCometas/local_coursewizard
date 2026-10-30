@@ -167,12 +167,20 @@
     background-color: var(--coursewizard-soft);
 }
 
-/* Input box like a chat composer: fields of the step and the round send button. */
+/* Input box: fields of the step, below them a labelled "Next" button. */
 .coursewizard-input {
     display: flex;
-    align-items: flex-end;
-    padding: 0.5rem 0.5rem 0.5rem 1rem;
+    flex-direction: column;
+    padding: 1rem;
     border: 1px solid #d5d9de;
+    border-radius: 1rem;
+}
+
+/* A single text field: chat composer, field and round send arrow on one line. */
+.coursewizard-input.coursewizard-compose {
+    flex-direction: row;
+    align-items: center;
+    padding: 0.5rem 0.5rem 0.5rem 1rem;
     border-radius: 1.375rem;
 }
 
@@ -191,16 +199,53 @@
 
 .coursewizard-nav {
     flex: 0 0 auto;
-    margin-left: 0.5rem;
+    align-self: flex-end;
+    margin-top: 0.75rem;
 }
 
-.coursewizard-send {
+.coursewizard-nav .coursewizard-send {
     display: flex;
     align-items: center;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+}
+
+.coursewizard-send-label {
+    margin-right: 0.375rem;
+}
+
+.coursewizard-nav .coursewizard-send-compose {
+    display: none;
+}
+
+.coursewizard-compose .coursewizard-nav {
+    align-self: center;
+    margin: 0 0 0 0.5rem;
+}
+
+.coursewizard-compose .coursewizard-nav .coursewizard-send {
     justify-content: center;
     width: 2.25rem;
     height: 2.25rem;
     padding: 0;
+}
+
+/* Icon only, the label stays for screen readers. */
+.coursewizard-compose .coursewizard-send-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.coursewizard-compose .coursewizard-nav .coursewizard-send-next {
+    display: none;
+}
+
+.coursewizard-compose .coursewizard-nav .coursewizard-send-compose {
+    display: inline-block;
 }
 
 .coursewizard-footer {
@@ -220,11 +265,6 @@
 .coursewizard-back[hidden] {
     visibility: hidden;
     display: inline-block;
-}
-
-.coursewizard-classic {
-    margin-left: auto;
-    color: var(--coursewizard-muted);
 }
 
 /* After the required steps: create the course right away, always visible at the bottom. */
@@ -325,11 +365,7 @@
     margin-top: 0.75rem;
 }
 
-/* One field per step: field and send button on one line, the question is the label. */
-.coursewizard-input:has(.coursewizard-single) {
-    align-items: center;
-}
-
+/* One field per step: the question is the label. */
 .coursewizard-ready .coursewizard-single .fitem.coursewizard-active {
     margin: 0 !important; /* Moodle's .mb-3. */
 }

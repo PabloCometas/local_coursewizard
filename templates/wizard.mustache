@@ -26,14 +26,12 @@
     * greeting - Personal greeting, first message of the dialog.
     * config - JSON with the steps for amd/src/wizard.js.
     * form - Moodle's course form, rendered HTML.
-    * classicurl - URL of Moodle's own course form.
 
     Example context (json):
     {
         "greeting": "Hallo Anna! Ich helfe dir, Schritt für Schritt einen neuen Kurs anzulegen.",
         "config": "{\"steps\": [], \"errorstep\": null}",
-        "form": "<form></form>",
-        "classicurl": "https://example.com/course/edit.php?category=1"
+        "form": "<form></form>"
     }
 }}
 <div id="local-coursewizard" class="coursewizard" data-config="{{config}}">
@@ -47,9 +45,10 @@
         <div class="coursewizard-input" data-region="input">
             {{{form}}}
             <div class="coursewizard-nav" data-region="nav">
-                <button type="button" class="btn btn-primary rounded-circle coursewizard-send" data-action="next"
-                        title="{{#str}}next{{/str}}" aria-label="{{#str}}next{{/str}}">
-                    <i class="icon fa fa-arrow-up fa-fw m-0" aria-hidden="true"></i>
+                <button type="button" class="btn btn-primary coursewizard-send" data-action="next" title="{{#str}}next{{/str}}">
+                    <span class="coursewizard-send-label">{{#str}}next{{/str}}</span>
+                    <i class="icon fa fa-arrow-right fa-fw m-0 coursewizard-send-next" aria-hidden="true"></i>
+                    <i class="icon fa fa-arrow-up fa-fw m-0 coursewizard-send-compose" aria-hidden="true"></i>
                 </button>
             </div>
         </div>
@@ -57,7 +56,6 @@
             <button type="button" class="btn btn-link coursewizard-back" data-action="back">
                 <i class="icon fa fa-arrow-left fa-fw" aria-hidden="true"></i>{{#str}}previous{{/str}}
             </button>
-            <a class="coursewizard-classic" href="{{classicurl}}">{{#str}}classicform, local_coursewizard{{/str}}</a>
         </div>
         <div class="coursewizard-create" data-region="createnow" hidden>
             <p class="coursewizard-create-text">{{#str}}optionalhint, local_coursewizard{{/str}}</p>
