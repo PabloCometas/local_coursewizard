@@ -344,9 +344,9 @@
     margin: 0 1.25rem 0.75rem 0;
 }
 
-/* Large choices in the chat (course or event) stand in the middle, also once answered. */
+/* Large choices in the chat (e-learning or event) stay on the left, also once answered. */
 .coursewizard-quick:has(.coursewizard-choice-card):not(.coursewizard-templates .coursewizard-quick) {
-    justify-content: center;
+    justify-content: flex-start;
     column-gap: 1.25rem;
 }
 
