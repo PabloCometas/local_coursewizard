@@ -286,8 +286,14 @@ const getKind = (state) => state.form.elements.coursekind?.value || 'course';
  */
 const applyKind = (state) => {
     const template = state.form.elements.templateid && state.form.elements.templateid.value !== '0';
-    if (template && state.form.elements.coursekind) {
-        state.form.elements.coursekind.value = 'course';
+    const kindfield = state.form.elements.coursekind;
+    if (kindfield && template) {
+        // Set by the template, not chosen: without the template the question is open again.
+        state.kindbytemplate = state.kindbytemplate || kindfield.value === '';
+        kindfield.value = 'course';
+    } else if (kindfield && state.kindbytemplate) {
+        state.kindbytemplate = false;
+        kindfield.value = '';
     }
     const kind = getKind(state);
     const current = state.config.steps[state.current]?.key;
@@ -300,6 +306,10 @@ const applyKind = (state) => {
         const index = (key) => Math.max(0, state.config.steps.findIndex((step) => step.key === key));
         state.current = index(current);
         state.reached = Math.max(state.current, reached === undefined ? state.config.steps.length : index(reached));
+        // The question "Course or event?" came back unanswered: ask it now, then return to where the dialog was.
+        if (kindfield && kindfield.value === '' && !template && state.config.steps[0]?.key === 'kind') {
+            state.current = 0;
+        }
     }
     const templates = state.root.querySelector('.coursewizard-templates');
     if (templates) {

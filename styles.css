@@ -428,8 +428,12 @@
     transition: opacity 0.2s;
 }
 
+/* Hover only hints at the area, the chosen card has it fully (otherwise hovering looks chosen). */
 .coursewizard-choice-card:hover::before,
-.coursewizard-choice-card:focus-visible::before,
+.coursewizard-choice-card:focus-visible::before {
+    opacity: 0.45;
+}
+
 .coursewizard-choice-card[aria-pressed="true"]::before {
     opacity: 1;
 }

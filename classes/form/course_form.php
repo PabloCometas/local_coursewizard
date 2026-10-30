@@ -129,10 +129,11 @@ class course_form extends \course_edit_form {
         // Course or event course (sessions of mod_facetoface), only if event courses can be created.
         $this->events = events::is_available(\context_coursecat::instance($this->_customdata['category']->id));
         if ($this->events) {
-            $kinds = ['course' => get_string('kindcourse', 'local_coursewizard'),
+            // Nothing chosen at first: a preselected card looks answered although the dialog waits.
+            $kinds = ['' => '', 'course' => get_string('kindcourse', 'local_coursewizard'),
                 'event' => get_string('kindevent', 'local_coursewizard')];
             $this->add_element('select', 'coursekind', get_string('kind', 'local_coursewizard'), $kinds);
-            $mform->setDefault('coursekind', 'course');
+            $mform->setDefault('coursekind', '');
 
             // The first session: tomorrow morning, can be changed.
             $start = usergetmidnight(time() + DAYSECS) + 9 * HOURSECS;
@@ -182,6 +183,9 @@ class course_form extends \course_edit_form {
         $errors = parent::validation($data, $files);
         if (!empty($data['templateid']) && !in_array((int) $data['templateid'], array_column($this->templates, 'id'))) {
             $errors['templateid'] = get_string('invaliddata', 'error');
+        }
+        if ($this->events && empty($data['templateid']) && !in_array($data['coursekind'] ?? '', ['course', 'event'])) {
+            $errors['coursekind'] = get_string('required');
         }
         if ($this->is_event($data)) {
             if ((int) $data['eventend'] <= (int) $data['eventstart']) {
@@ -352,6 +356,9 @@ class course_form extends \course_edit_form {
                 $choices = [];
                 foreach ($mform->getElement($name)->_options as $option) {
                     $value = (string) $option['attr']['value'];
+                    if ($value === '') {
+                        continue;
+                    }
                     $choices[$value] = ['value' => $value, 'label' => trim(strip_tags($option['text'])),
                         'icon' => self::CHOICES[$name][$value] ?? '', 'image' => '', 'url' => '', 'description' => ''];
                     if (isset(self::CHOICEHELP[$name])) {
