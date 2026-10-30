@@ -391,6 +391,12 @@
     opacity: 1;
 }
 
+/* The choices (e.g. in the history, animated) are a layer of their own: lift it above the text below. */
+.coursewizard-quick:has(.coursewizard-choice-tip):has(.coursewizard-option:hover, .coursewizard-option:focus-within) {
+    position: relative;
+    z-index: 5;
+}
+
 /* Wider than their label ("E-learning / blended"), so the text has some space left and right. */
 .coursewizard-quick:not(.coursewizard-templates .coursewizard-quick) .coursewizard-choice-card {
     width: 13rem;

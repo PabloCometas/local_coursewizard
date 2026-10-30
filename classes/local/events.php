@@ -118,7 +118,8 @@ class events {
             'showoncalendar' => F2F_CAL_COURSE,
             'usercalentry' => 1,
             'allowcancellationsdefault' => 1,
-            'reminderperiod' => facetoface_get_default_reminderperiod(),
+            'reminderperiod' => function_exists('facetoface_get_default_reminderperiod')
+                ? facetoface_get_default_reminderperiod() : 2,
             'confirmationmessageformat' => FORMAT_HTML,
         ];
         foreach (
@@ -127,7 +128,7 @@ class events {
                 'waitlistedmessage', 'waitlistedinstrmngr', 'cancellationsubject', 'cancellationmessage',
                 'cancellationinstrmngr'] as $message
         ) {
-            $facetoface->$message = facetoface_get_default_message($message);
+            $facetoface->$message = self::default_message($message);
         }
         $facetoface = create_module($facetoface);
 
@@ -144,5 +145,23 @@ class events {
             'allowcancellations' => 1,
         ];
         facetoface_add_session($session, [(object) ['timestart' => $timestart, 'timefinish' => $timefinish]]);
+    }
+
+    /**
+     * Returns the default text of a message of mod_facetoface, as its form sets it.
+     *
+     * Newer versions have facetoface_get_default_message() (site settings per language),
+     * older ones use language strings directly.
+     *
+     * @param string $field Message field, e.g. "confirmationsubject".
+     * @return string
+     */
+    protected static function default_message(string $field): string {
+        if (function_exists('facetoface_get_default_message')) {
+            return facetoface_get_default_message($field);
+        }
+        $stringid = $field === 'confirmationmessage' ? 'setting:defaultconfirmationmessagedefault2'
+            : 'setting:default' . $field . 'default';
+        return get_string_manager()->string_exists($stringid, 'facetoface') ? get_string($stringid, 'facetoface') : '';
     }
 }
