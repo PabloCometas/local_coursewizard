@@ -167,7 +167,8 @@ class course_form extends \course_edit_form {
      */
     public function is_event($data): bool {
         $data = (array) $data;
-        return $this->events && ($data['coursekind'] ?? '') === 'event';
+        // A course from a template is always e-learning (the dialog does not ask then).
+        return $this->events && ($data['coursekind'] ?? '') === 'event' && empty($data['templateid']);
     }
 
     /**

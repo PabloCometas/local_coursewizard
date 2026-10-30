@@ -279,14 +279,28 @@ const getKind = (state) => state.form.elements.coursekind?.value || 'course';
 
 /**
  * Leaves out the steps of the other kind (course or event course) and hides the templates for events.
+ * A course from a template is always e-learning, so the question "Course or event?" is left out then.
+ * The dialog stays at the step it is at.
  *
  * @param {Object} state
  */
 const applyKind = (state) => {
+    const template = state.form.elements.templateid && state.form.elements.templateid.value !== '0';
+    if (template && state.form.elements.coursekind) {
+        state.form.elements.coursekind.value = 'course';
+    }
     const kind = getKind(state);
-    state.config.steps = state.allsteps.filter((step) => step.kind === '' || step.kind === kind);
+    const current = state.config.steps[state.current]?.key;
+    const reached = state.config.steps[state.reached]?.key;
+    state.config.steps = state.allsteps.filter((step) => (step.kind === '' || step.kind === kind) &&
+        !(template && step.key === 'kind'));
     // Required steps come first (course_form::get_wizard_config()).
     state.lastrequired = state.config.steps.map((step) => step.required).lastIndexOf(true);
+    if (current !== undefined) {
+        const index = (key) => Math.max(0, state.config.steps.findIndex((step) => step.key === key));
+        state.current = index(current);
+        state.reached = Math.max(state.current, reached === undefined ? state.config.steps.length : index(reached));
+    }
     const templates = state.root.querySelector('.coursewizard-templates');
     if (templates) {
         templates.hidden = kind === 'event';
@@ -616,6 +630,9 @@ export const init = (selector) => {
             const on = button.getAttribute('aria-checked') !== 'true';
             chooseTemplate(state, on ? state.config.templates[0].value : '0');
             showTemplates(state, true);
+            // With a template the question "Course or event?" is left out, without it comes back.
+            applyKind(state);
+            show(state, true);
         } else if (button.dataset.action === 'choose' && button.dataset.step === 'template') {
             chooseTemplate(state, button.dataset.value);
             showTemplates(state, false);
