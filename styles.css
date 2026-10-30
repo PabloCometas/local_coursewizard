@@ -446,7 +446,7 @@
     display: flex !important; /* Block in the vertical form. */
     flex-wrap: nowrap !important; /* Moodle's .flex-wrap. */
     align-items: center !important; /* Moodle's .align-items-start. */
-    padding: 0.25rem 2rem 0.25rem 0.375rem;
+    padding: 0.375rem 2rem 0.375rem 0.375rem !important; /* Moodle's column padding. */
     border: 1px solid #d5d9de;
     border-radius: 0.625rem;
 }
@@ -462,14 +462,20 @@
 }
 
 .coursewizard-ready .coursewizard-form .form-autocomplete-selection .badge {
-    margin: 0.125rem !important;
+    margin: 0 !important;
     padding: 0.375rem 0.75rem;
+    box-shadow: none !important; /* Moodle's ring around the active selection. */
     color: var(--primary, #0f6cbf) !important;
     font-weight: 500;
     background-color: #e8f1fb !important;
     border: 0;
     border-radius: 999px;
     pointer-events: none; /* A click would remove the only selection. */
+}
+
+/* The ring only while the selection has the keyboard focus. */
+.coursewizard-ready .coursewizard-form .form-autocomplete-selection:focus-visible .badge {
+    box-shadow: 0 0 0 0.125rem var(--primary, #0f6cbf) !important;
 }
 
 /* The "×" looks like "delete", choosing another entry replaces the selection anyway. */
