@@ -33,8 +33,10 @@ const SINGLE = 'coursewizard-single';
 const COMPOSE = 'coursewizard-compose';
 const TYPING = 'coursewizard-typing-active';
 const APPEAR = 'coursewizard-appear';
+const VANISH = 'coursewizard-vanish';
 const MAXANSWER = 160;
 const TYPINGDELAY = 400;
+const VANISHDELAY = 400;
 
 /**
  * Returns the form item (label and field) of an element.
@@ -230,12 +232,8 @@ const show = async(state, focus) => {
             choices: getChoices(state, step, index),
             explanation: state.explained.has(index) ? step.explanation : '',
             fresh: animate && !explaining && index === state.answered,
-            decision: index === state.lastrequired && hasoptional ? {
-                text: state.config.decision,
-                decided: state.decided,
-                answer: state.config.strings.moredetails,
-                fresh: animate && state.answered === null && state.decided,
-            } : null,
+            // Only while it is open: once decided, the offer no longer applies and disappears.
+            decision: index === state.lastrequired && hasoptional && !state.decided ? {text: state.config.decision} : null,
         })),
         question: atdecision ? '' : (isdone ? state.config.done : steps[state.current].question),
         explain: !atdecision && !isdone && !state.explained.has(state.current) && steps[state.current].explanation !== '',
@@ -385,6 +383,23 @@ const later = (state) => {
 };
 
 /**
+ * Adds the optional details: the offer dissolves, then the first optional question follows.
+ *
+ * @param {Object} state
+ * @param {HTMLElement|null} box The green box with the offer.
+ */
+const more = async(state, box) => {
+    if (box && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        box.classList.add(VANISH);
+        await new Promise((resolve) => setTimeout(resolve, VANISHDELAY));
+    }
+    state.decided = true;
+    state.answered = null;
+    state.animate = true;
+    show(state, true);
+};
+
+/**
  * Creates the course right away, the remaining steps keep their defaults.
  *
  * @param {Object} state
@@ -465,10 +480,7 @@ export const init = (selector) => {
             state.animate = 'explain';
             show(state, true);
         } else if (button.dataset.action === 'more') {
-            state.decided = true;
-            state.answered = null;
-            state.animate = true;
-            show(state, true);
+            more(state, button.closest('.coursewizard-decision'));
         } else if (button.dataset.action === 'back') {
             // From the first optional step back to the decision, from there to the last required step.
             if (state.current === state.lastrequired + 1 && state.decided) {

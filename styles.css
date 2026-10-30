@@ -376,6 +376,25 @@
     animation-delay: 0.05s;
 }
 
+/* The offer after the required steps dissolves once more details are chosen. */
+.coursewizard-vanish {
+    pointer-events: none;
+    animation: coursewizard-dissolve 0.4s ease-in both;
+}
+
+@keyframes coursewizard-dissolve {
+    from {
+        opacity: 1;
+        transform: none;
+        filter: none;
+    }
+    to {
+        opacity: 0;
+        transform: scale(1.06) translateY(-0.25rem);
+        filter: blur(0.5rem);
+    }
+}
+
 @keyframes coursewizard-slidein {
     from {
         opacity: 0;

@@ -24,8 +24,9 @@
     Context variables required for this template:
     * answered - Answered steps: index, question, explanation (if asked for),
       answers (label and value per field), choices (instead of answers: buttons
-      that stay, index, name, value, label, icon, selected), fresh (just answered, slides in), decision (after the last required
-      step, otherwise null): text, decided (more details chosen), answer, fresh.
+      that stay, index, name, value, label, icon, selected), fresh (just answered,
+      slides in), decision (after the last required step while still open,
+      otherwise null): text.
     * question - Question of the current step, empty while the decision is open.
     * explain - Show the button "What is this for?" after the question.
     * explanation - Explanation of the current step, once asked for.
@@ -46,10 +47,7 @@
                 ],
                 "fresh": true,
                 "decision": {
-                    "text": "Thanks, Anna! You have entered everything needed and can open your course now.",
-                    "decided": false,
-                    "answer": "Add more details",
-                    "fresh": false
+                    "text": "Thanks, Anna! You have entered everything needed and can open your course now."
                 }
             }
         ],
@@ -90,22 +88,15 @@
     {{#decision}}
         <div class="coursewizard-decision" role="status">
             <p class="coursewizard-decision-text">{{text}}</p>
-            {{^decided}}
-                <div class="coursewizard-choices">
-                    <button type="button" class="btn btn-primary rounded-pill" data-action="create">
-                        {{#str}}createnow, local_coursewizard{{/str}}
-                    </button>
-                    <button type="button" class="btn btn-light rounded-pill coursewizard-pill" data-action="more">
-                        {{#str}}moredetails, local_coursewizard{{/str}}
-                    </button>
-                </div>
-            {{/decided}}
-        </div>
-        {{#decided}}
-            <div class="coursewizard-user{{#fresh}} coursewizard-fresh{{/fresh}}">
-                <span class="coursewizard-answer">{{answer}}</span>
+            <div class="coursewizard-choices">
+                <button type="button" class="btn btn-primary rounded-pill" data-action="create">
+                    {{#str}}createnow, local_coursewizard{{/str}}
+                </button>
+                <button type="button" class="btn btn-light rounded-pill coursewizard-pill" data-action="more">
+                    {{#str}}moredetails, local_coursewizard{{/str}}
+                </button>
             </div>
-        {{/decided}}
+        </div>
     {{/decision}}
 {{/answered}}
 {{#question}}
