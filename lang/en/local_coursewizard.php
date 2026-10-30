@@ -24,6 +24,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
+$string['classicform'] = 'Use the classic form instead';
+$string['greeting'] = 'Hi {$a}! I will help you create a new course, step by step.';
 $string['pluginname'] = 'Course wizard';
 $string['privacy:metadata'] = 'The Course wizard plugin does not store any personal data.';
-$string['wizardplaceholder'] = 'The guided dialog for creating a course will appear here.';
+$string['step_category'] = 'In which category should your course appear?';
+$string['step_dates'] = 'When does your course start, and when does it end?';
+$string['step_done'] = 'Thanks, {$a}! Your course is ready. Check the answers above and create the course.';
+$string['step_fullname'] = 'What should your new course be called?';
+$string['step_image'] = 'Do you have an image for your course? This is optional too.';
+$string['step_more'] = 'On this site, the course also needs the following:';
+$string['step_summary'] = 'Would you like to describe your course briefly? This is optional.';
+$string['step_visible'] = 'Should participants already be able to see your course?';

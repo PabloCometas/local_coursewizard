@@ -1,0 +1,88 @@
+/* ==================== Dialog ==================== */
+
+.coursewizard {
+    max-width: 720px;
+}
+
+.coursewizard-msg {
+    width: fit-content;
+    max-width: 85%;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: 1rem;
+}
+
+.coursewizard-answer {
+    white-space: pre-line;
+}
+
+.coursewizard-msg-bot {
+    background-color: #f1f3f5;
+    border-bottom-left-radius: 0.25rem;
+}
+
+.coursewizard-msg-user {
+    margin-left: auto;
+    color: #fff;
+    background-color: var(--primary, #0f6cbf);
+    border-bottom-right-radius: 0.25rem;
+}
+
+.coursewizard-msg-user .coursewizard-edit {
+    margin-left: 0.75rem;
+    color: inherit;
+    text-decoration: underline;
+}
+
+.coursewizard-input {
+    margin-top: 1rem;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 1rem;
+}
+
+.coursewizard-nav {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.coursewizard-nav .btn + .btn {
+    margin-left: 0.5rem;
+}
+
+.coursewizard-classic {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+}
+
+/* ==================== Moodle course form: only the current step ==================== */
+
+/* Without JavaScript the full Moodle form stays usable. */
+.coursewizard:not(.coursewizard-ready) .coursewizard-nav {
+    display: none;
+}
+
+/* With JavaScript, hide the full form until the dialog has started. */
+.jsenabled .coursewizard:not(.coursewizard-ready) .coursewizard-input {
+    visibility: hidden;
+}
+
+.coursewizard-ready .coursewizard-form fieldset {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.coursewizard-ready .coursewizard-form fieldset > legend + .d-flex,
+.coursewizard-ready .coursewizard-form .collapsible-actions,
+.coursewizard-ready .coursewizard-form .fdescription.required {
+    display: none !important; /* Moodle's header uses .d-flex. */
+}
+
+.coursewizard-ready .coursewizard-form .fitem:not(.coursewizard-active):not(.coursewizard-active .fitem) {
+    display: none !important;
+}
+
+.coursewizard-ready .coursewizard-form .fitem.coursewizard-active {
+    margin-bottom: 0.5rem;
+}

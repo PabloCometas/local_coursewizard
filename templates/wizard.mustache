@@ -17,16 +17,34 @@
 {{!
     @template local_coursewizard/wizard
 
-    Container of the guided course creation dialog.
+    Guided course creation dialog: chat history, Moodle's course form (only the
+    fields of the current step are shown) and the step navigation.
 
     Context variables required for this template:
-    * categoryid - Course category the new course is created in.
+    * greeting - Personal greeting, first message of the dialog.
+    * config - JSON with the steps for amd/src/wizard.js.
+    * form - Moodle's course form, rendered HTML.
+    * classicurl - URL of Moodle's own course form.
 
     Example context (json):
     {
-        "categoryid": 1
+        "greeting": "Hallo Anna! Ich helfe Ihnen, Schritt für Schritt einen neuen Kurs anzulegen.",
+        "config": "{\"steps\": [], \"errorstep\": null}",
+        "form": "<form></form>",
+        "classicurl": "https://example.com/course/edit.php?category=1"
     }
 }}
-<div id="local-coursewizard" class="local-coursewizard" data-categoryid="{{categoryid}}">
-    <p>{{#str}}wizardplaceholder, local_coursewizard{{/str}}</p>
+<div id="local-coursewizard" class="coursewizard" data-config="{{config}}">
+    <div class="coursewizard-msg coursewizard-msg-bot">{{greeting}}</div>
+    <div data-region="history" aria-live="polite"></div>
+    <div class="coursewizard-input">
+        {{{form}}}
+        <div class="coursewizard-nav" data-region="nav">
+            <button type="button" class="btn btn-secondary" data-action="back">{{#str}}previous{{/str}}</button>
+            <button type="button" class="btn btn-primary" data-action="next">{{#str}}next{{/str}}</button>
+        </div>
+    </div>
+    <p class="coursewizard-classic">
+        <a href="{{classicurl}}">{{#str}}classicform, local_coursewizard{{/str}}</a>
+    </p>
 </div>
