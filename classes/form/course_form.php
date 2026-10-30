@@ -171,6 +171,8 @@ class course_form extends \course_edit_form {
         // Steps with a required field first: after them the course can be created right away.
         foreach ($steps as &$step) {
             $step['required'] = (bool) array_filter($step['elements'], fn($element) => $element['requiredmessage'] !== '');
+            // Shown on request ("What is this for?") below the question.
+            $step['explanation'] = get_string('explain_' . $step['key'], 'local_coursewizard');
         }
         unset($step);
         $steps = array_merge(

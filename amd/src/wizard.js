@@ -162,7 +162,9 @@ const validateStep = (state, step) => {
  */
 const show = async(state, focus) => {
     // Only after an answer: the answer slides in, then the reply follows after a short "typing" pause.
-    const animate = state.animate && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const animate = state.animate !== false && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    // After "What is this for?" only the explanation follows, no answer and no new input.
+    const explaining = state.animate === 'explain';
     state.animate = false;
     const render = ++state.renders;
     const steps = state.config.steps;
@@ -175,7 +177,8 @@ const show = async(state, focus) => {
             index: index,
             question: step.question,
             answers: getStepAnswer(state, step, state.skipped.has(index)),
-            fresh: animate && index === state.current - 1 && !(index === state.lastrequired && state.decided),
+            explanation: state.explained.has(index) ? step.explanation : '',
+            fresh: animate && !explaining && index === state.current - 1 && !(index === state.lastrequired && state.decided),
             decision: index === state.lastrequired && hasoptional ? {
                 text: state.config.decision,
                 decided: state.decided,
@@ -184,6 +187,8 @@ const show = async(state, focus) => {
             } : null,
         })),
         question: atdecision ? '' : (isdone ? state.config.done : steps[state.current].question),
+        explain: !atdecision && !isdone && !state.explained.has(state.current) && steps[state.current].explanation !== '',
+        explanation: !atdecision && !isdone && state.explained.has(state.current) ? steps[state.current].explanation : '',
     };
     const {html, js} = await Templates.renderForPromise('local_coursewizard/history', context);
     if (render !== state.renders) {
@@ -194,7 +199,7 @@ const show = async(state, focus) => {
     const reply = animate ? state.history.lastElementChild : null;
     if (reply && !reply.classList.contains('coursewizard-user')) {
         reply.hidden = true;
-        state.root.classList.add(TYPING);
+        state.root.classList.toggle(TYPING, !explaining);
         state.history.insertAdjacentHTML('beforeend', '<div class="coursewizard-bot coursewizard-typing" aria-hidden="true">' +
             '<span></span><span></span><span></span></div>');
     }
@@ -241,9 +246,11 @@ const show = async(state, focus) => {
         state.history.querySelector('.coursewizard-typing')?.remove();
         reply.hidden = false;
         reply.classList.add(APPEAR);
-        state.root.classList.remove(TYPING);
-        state.input.classList.add(APPEAR);
-        state.input.addEventListener('animationend', () => state.input.classList.remove(APPEAR), {once: true});
+        if (!explaining) {
+            state.root.classList.remove(TYPING);
+            state.input.classList.add(APPEAR);
+            state.input.addEventListener('animationend', () => state.input.classList.remove(APPEAR), {once: true});
+        }
     }
 
     if (focus && atdecision) {
@@ -346,7 +353,10 @@ export const init = (selector) => {
     state.decided = state.current > state.lastrequired;
     // Optional steps skipped with "Later".
     state.skipped = new Set();
-    // Set before show() to animate the answer and the reply, counter drops outdated renders.
+    // Steps whose explanation was asked for, it stays in the history.
+    state.explained = new Set();
+    // Set before show() to animate the answer and the reply (true) or the explanation ('explain'),
+    // the counter drops outdated renders.
     state.animate = false;
     state.renders = 0;
     if (!state.form || !config.steps.length) {
@@ -364,6 +374,10 @@ export const init = (selector) => {
             create(state);
         } else if (button.dataset.action === 'later') {
             later(state);
+        } else if (button.dataset.action === 'explain') {
+            state.explained.add(state.current);
+            state.animate = 'explain';
+            show(state, true);
         } else if (button.dataset.action === 'more') {
             state.decided = true;
             state.animate = true;
