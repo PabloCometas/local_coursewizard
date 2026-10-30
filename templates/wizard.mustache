@@ -18,7 +18,9 @@
     @template local_coursewizard/wizard
 
     Guided course creation dialog: chat history, Moodle's course form (only the
-    fields of the current step are shown) and the step navigation.
+    fields of the current step are shown), the step navigation and, once all
+    required steps are answered, a bar sticking to the bottom of the screen to
+    create the course right away.
 
     Context variables required for this template:
     * greeting - Personal greeting, first message of the dialog.
@@ -37,12 +39,18 @@
 <div id="local-coursewizard" class="coursewizard" data-config="{{config}}">
     <div class="coursewizard-msg coursewizard-msg-bot">{{greeting}}</div>
     <div data-region="history" aria-live="polite"></div>
-    <div class="coursewizard-input">
+    <div class="coursewizard-input" data-region="input">
         {{{form}}}
         <div class="coursewizard-nav" data-region="nav">
             <button type="button" class="btn btn-secondary" data-action="back">{{#str}}previous{{/str}}</button>
             <button type="button" class="btn btn-primary" data-action="next">{{#str}}next{{/str}}</button>
         </div>
+    </div>
+    <div class="coursewizard-create" data-region="createnow" hidden>
+        <p class="coursewizard-create-text">{{#str}}optionalhint, local_coursewizard{{/str}}</p>
+        <button type="button" class="btn btn-primary btn-lg" data-action="create">
+            {{#str}}createnow, local_coursewizard{{/str}}
+        </button>
     </div>
     <p class="coursewizard-classic">
         <a href="{{classicurl}}">{{#str}}classicform, local_coursewizard{{/str}}</a>

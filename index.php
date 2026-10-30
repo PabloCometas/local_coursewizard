@@ -92,8 +92,17 @@ $PAGE->set_heading(format_string($category->name));
 
 $config = $editform->get_wizard_config();
 $config['done'] = get_string('step_done', 'local_coursewizard', $USER->firstname);
-$config['optionalhint'] = get_string('optionalhint', 'local_coursewizard');
+// After the required steps the dialog offers to create the course or to add the optional details.
+$details = [];
+foreach ($config['steps'] as $step) {
+    if (!$step['required']) {
+        $details = array_merge($details, array_column($step['elements'], 'label'));
+    }
+}
+$config['decision'] = get_string('decision', 'local_coursewizard',
+    (object) ['name' => $USER->firstname, 'details' => implode(', ', array_filter($details))]);
 $config['strings'] = [
+    'moredetails' => get_string('moredetails', 'local_coursewizard'),
     'none' => get_string('none'),
     'yes' => get_string('yes'),
     'no' => get_string('no'),

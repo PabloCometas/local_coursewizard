@@ -156,27 +156,41 @@ const show = async(state, focus) => {
     const steps = state.config.steps;
     const isdone = state.current >= steps.length;
     const hasoptional = state.lastrequired < steps.length - 1;
+    // After the last required step: create the course now or add the optional details.
+    const atdecision = hasoptional && state.current === state.lastrequired + 1 && !state.decided;
     const context = {
         answered: steps.slice(0, state.current).map((step, index) => ({
             index: index,
             question: step.question,
             answer: getStepAnswer(state, step),
+            decision: index === state.lastrequired && hasoptional ? {
+                text: state.config.decision,
+                decided: state.decided,
+                answer: state.config.strings.moredetails,
+            } : null,
         })),
-        // Shown on every optional step, so it is always clear the course can be created now.
-        createnow: hasoptional && !isdone && state.current > state.lastrequired ? state.config.optionalhint : '',
-        question: isdone ? state.config.done : steps[state.current].question,
+        question: atdecision ? '' : (isdone ? state.config.done : steps[state.current].question),
     };
     const {html, js} = await Templates.renderForPromise('local_coursewizard/history', context);
     Templates.replaceNodeContents(state.history, html, js);
 
     state.form.querySelectorAll('.' + ACTIVE).forEach((node) => node.classList.remove(ACTIVE));
-    const names = isdone ? ['buttonar'] : steps[state.current].elements.map((element) => element.name);
+    let names = isdone ? ['buttonar'] : steps[state.current].elements.map((element) => element.name);
+    if (atdecision) {
+        names = [];
+    }
     const items = names.map(getItem).filter((item) => item !== null);
     items.forEach((item) => item.classList.add(ACTIVE));
 
+    state.input.hidden = atdecision;
     state.nav.querySelector('[data-action="back"]').hidden = state.current === 0;
     state.nav.querySelector('[data-action="next"]').hidden = isdone;
+    // Visible on every optional step, so it is always clear the course can be created now.
+    state.createnow.hidden = !hasoptional || isdone || atdecision || state.current <= state.lastrequired;
 
+    if (focus && atdecision) {
+        state.history.querySelector('[data-action="create"]').focus();
+    }
     if (focus && items.length) {
         const field = items[0].querySelector('input:not([type="hidden"]), select, textarea, button');
         if (field) {
@@ -246,10 +260,14 @@ export const init = (selector) => {
         form: root.querySelector('form'),
         history: root.querySelector('[data-region="history"]'),
         nav: root.querySelector('[data-region="nav"]'),
+        createnow: root.querySelector('[data-region="createnow"]'),
+        input: root.querySelector('[data-region="input"]'),
         current: config.errorstep === null ? 0 : config.errorstep,
         // Required steps come first (course_form::get_wizard_config()).
         lastrequired: config.steps.map((step) => step.required).lastIndexOf(true),
     };
+    // A validation error in an optional step means the details were chosen before.
+    state.decided = state.current > state.lastrequired;
     if (!state.form || !config.steps.length) {
         return;
     }
@@ -263,8 +281,16 @@ export const init = (selector) => {
             next(state);
         } else if (button.dataset.action === 'create') {
             create(state);
+        } else if (button.dataset.action === 'more') {
+            state.decided = true;
+            show(state, true);
         } else if (button.dataset.action === 'back') {
-            state.current--;
+            // From the first optional step back to the decision, from there to the last required step.
+            if (state.current === state.lastrequired + 1 && state.decided) {
+                state.decided = false;
+            } else {
+                state.current--;
+            }
             show(state, true);
         } else if (button.dataset.action === 'edit') {
             state.current = Number(button.dataset.step);

@@ -18,21 +18,29 @@
     @template local_coursewizard/history
 
     Chat history of the guided course creation dialog: answered steps with their
-    answers, once all required steps are answered a prominent card to create the
-    course right away, then the question of the current step.
+    answers, after the last required step the offer to create the course right
+    away, then the question of the current step.
 
     Context variables required for this template:
-    * answered - Answered steps: index, question, answer.
-    * createnow - Message of the card to create the course now, empty to hide the card.
-    * question - Question of the current step.
+    * answered - Answered steps: index, question, answer, decision (after the last
+      required step, otherwise null): text, decided (more details chosen), answer.
+    * question - Question of the current step, empty while the decision is open.
 
     Example context (json):
     {
         "answered": [
-            {"index": 0, "question": "Wie soll dein neuer Kurs heissen?", "answer": "Excel Grundlagen"}
+            {
+                "index": 0,
+                "question": "Wie soll dein neuer Kurs heissen?",
+                "answer": "Excel Grundlagen",
+                "decision": {
+                    "text": "Danke, Anna! Du hast alles Nötige angegeben und kannst den Kurs jetzt anlegen.",
+                    "decided": false,
+                    "answer": "Weitere Angaben machen"
+                }
+            }
         ],
-        "createnow": "Das Wichtigste ist erledigt. Du kannst den Kurs jetzt anlegen oder noch ein paar freiwillige Angaben machen.",
-        "question": "Möchtest du deinen Kurs kurz beschreiben? Das ist freiwillig."
+        "question": ""
     }
 }}
 {{#answered}}
@@ -43,13 +51,27 @@
             {{#str}}edit{{/str}}
         </button>
     </div>
+    {{#decision}}
+        <div class="alert alert-success coursewizard-decision" role="status">
+            <p class="coursewizard-decision-text">{{text}}</p>
+            {{^decided}}
+                <div class="coursewizard-choices">
+                    <button type="button" class="btn btn-primary btn-lg" data-action="create">
+                        {{#str}}createnow, local_coursewizard{{/str}}
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary btn-lg" data-action="more">
+                        {{#str}}moredetails, local_coursewizard{{/str}}
+                    </button>
+                </div>
+            {{/decided}}
+        </div>
+        {{#decided}}
+            <div class="coursewizard-msg coursewizard-msg-user">
+                <span class="coursewizard-answer">{{answer}}</span>
+            </div>
+        {{/decided}}
+    {{/decision}}
 {{/answered}}
-{{#createnow}}
-    <div class="coursewizard-create">
-        <p class="coursewizard-create-text">{{createnow}}</p>
-        <button type="button" class="btn btn-primary btn-lg" data-action="create">
-            {{#str}}createnow, local_coursewizard{{/str}}
-        </button>
-    </div>
-{{/createnow}}
-<div class="coursewizard-msg coursewizard-msg-bot">{{question}}</div>
+{{#question}}
+    <div class="coursewizard-msg coursewizard-msg-bot">{{question}}</div>
+{{/question}}

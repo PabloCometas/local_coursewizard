@@ -181,7 +181,7 @@ class course_form extends \course_edit_form {
      * Describes the given form elements for the dialog.
      *
      * @param array $names Element names.
-     * @return array For each shown element: name, type and the message if it is required.
+     * @return array For each shown element: name, type, label and the message if it is required.
      */
     protected function export_elements(array $names): array {
         $mform = $this->_form;
@@ -195,7 +195,8 @@ class course_form extends \course_edit_form {
             if (in_array($type, self::SKIPPEDTYPES)) {
                 continue;
             }
-            $element = ['name' => $name, 'type' => $type, 'requiredmessage' => ''];
+            $label = trim(strip_tags((string) $mform->getElement($name)->getLabel()));
+            $element = ['name' => $name, 'type' => $type, 'label' => $label, 'requiredmessage' => ''];
             if ($mform->isElementRequired($name)) {
                 $element['requiredmessage'] = get_string('required');
                 foreach ($mform->_rules[$name] ?? [] as $rule) {

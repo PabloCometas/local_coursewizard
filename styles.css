@@ -41,17 +41,53 @@
     text-decoration: underline;
 }
 
-/* After the required steps: create the course right away. */
+/* After the required steps: green info box "create now or add details?" (Moodle's .alert-success). */
+.coursewizard-decision {
+    margin: 1rem 0;
+    border-radius: 1rem;
+}
+
+.coursewizard-decision-text {
+    margin: 0;
+    font-weight: bold;
+}
+
+.coursewizard-choices {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+}
+
+.coursewizard-choices .btn {
+    margin: 0 0.5rem 0.5rem 0;
+}
+
+@media (max-width: 576px) {
+    .coursewizard-choices .btn {
+        width: 100%;
+        margin-right: 0;
+    }
+}
+
+/* After the required steps: create the course right away, always visible at the bottom. */
 .coursewizard-create {
+    position: sticky;
+    bottom: 1rem;
+    z-index: 2;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    margin: 1.5rem 0;
-    padding: 1.25rem 1.5rem;
+    margin-top: 1rem;
+    padding: 1rem 1.5rem;
     border: 2px solid var(--primary, #0f6cbf);
     border-radius: 1rem;
-    background-color: #f5f9fd;
+    background-color: #fff;
+    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.coursewizard-create[hidden] {
+    display: none;
 }
 
 .coursewizard-create-text {
