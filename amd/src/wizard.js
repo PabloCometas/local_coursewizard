@@ -209,8 +209,8 @@ const getChoices = (state, step, index) => {
  */
 const exportChoices = (state, element, step) => {
     const current = state.form.elements[element.name].value;
-    // With images (templates) all choices are cards, so they line up.
-    const card = element.choices.some((choice) => choice.image !== '');
+    // With images (templates) all choices are cards, so they line up; some choices are cards anyway (course or event).
+    const card = element.cards || element.choices.some((choice) => choice.image !== '');
     return element.choices.map((choice) => ({...choice, step: step, name: element.name, selected: choice.value === current,
         card: card}));
 };
@@ -265,6 +265,34 @@ const chooseTemplate = (state, value) => {
     } else if (textarea) {
         textarea.value = summary;
         state.prefilled = summary;
+    }
+};
+
+/**
+ * Returns what is created: 'course' or 'event' (event course, only if offered).
+ *
+ * @param {Object} state
+ * @returns {string}
+ */
+const getKind = (state) => state.form.elements.coursekind?.value || 'course';
+
+/**
+ * Leaves out the steps of the other kind (course or event course) and hides the templates for events.
+ *
+ * @param {Object} state
+ */
+const applyKind = (state) => {
+    const kind = getKind(state);
+    state.config.steps = state.allsteps.filter((step) => step.kind === '' || step.kind === kind);
+    // Required steps come first (course_form::get_wizard_config()).
+    state.lastrequired = state.config.steps.map((step) => step.required).lastIndexOf(true);
+    const templates = state.root.querySelector('.coursewizard-templates');
+    if (templates) {
+        templates.hidden = kind === 'event';
+        if (kind === 'event' && state.form.elements.templateid.value !== '0') {
+            chooseTemplate(state, '0');
+            showTemplates(state, false);
+        }
     }
 };
 
@@ -326,7 +354,8 @@ const show = async(state, focus) => {
             explanation: state.explained.has(index) ? step.explanation : '',
             fresh: animate && !explaining && index === state.answered,
             // Only while it is open: once decided, the offer no longer applies and disappears.
-            decision: index === state.lastrequired && hasoptional && !state.decided ? {text: state.config.decision} : null,
+            decision: index === state.lastrequired && hasoptional && !state.decided
+                ? {text: state.config.decision[getKind(state)]} : null,
         })),
         question: atdecision ? '' : (isdone ? state.config.done : steps[state.current].question),
         explain: !atdecision && !isdone && !state.explained.has(state.current) && steps[state.current].explanation !== '',
@@ -540,10 +569,19 @@ export const init = (selector) => {
         input: root.querySelector('[data-region="input"]'),
         quick: root.querySelector('[data-region="quick"]'),
         templates: root.querySelector('[data-region="templates"]'),
-        current: config.errorstep === null ? 0 : config.errorstep,
-        // Required steps come first (course_form::get_wizard_config()).
-        lastrequired: config.steps.map((step) => step.required).lastIndexOf(true),
+        // All steps, config.steps only those of the chosen kind (applyKind()).
+        allsteps: config.steps,
+        // Name and description prefilled from a template, replaced when another template is chosen.
+        prefilledname: '',
+        prefilled: '',
     };
+    if (!state.form || !config.steps.length) {
+        return;
+    }
+    applyKind(state);
+    // After a server error the dialog opens the step with the error.
+    const errorkey = config.errorstep === null ? null : state.allsteps[config.errorstep].key;
+    state.current = errorkey === null ? 0 : Math.max(0, config.steps.findIndex((step) => step.key === errorkey));
     // A validation error in an optional step means the details were chosen before.
     state.decided = state.current > state.lastrequired;
     // Optional steps skipped with "Later".
@@ -552,18 +590,12 @@ export const init = (selector) => {
     state.reached = state.current;
     // Step just answered, its answer slides in (null: "more details" chosen).
     state.answered = null;
-    // Name and description prefilled from a template, replaced when another template is chosen.
-    state.prefilledname = '';
-    state.prefilled = '';
     // Steps whose explanation was asked for, it stays in the history.
     state.explained = new Set();
     // Set before show() to animate the answer and the reply (true) or the explanation ('explain'),
     // the counter drops outdated renders.
     state.animate = false;
     state.renders = 0;
-    if (!state.form || !config.steps.length) {
-        return;
-    }
 
     root.addEventListener('click', (event) => {
         const button = event.target.closest('[data-action]');
@@ -586,8 +618,21 @@ export const init = (selector) => {
             showTemplates(state, false);
         } else if (button.dataset.action === 'choose') {
             const select = state.form.elements[button.dataset.name];
+            const changed = select.value !== button.dataset.value;
             select.value = button.dataset.value;
             select.dispatchEvent(new Event('change', {bubbles: true}));
+            // Course or event changed later on: the questions after it differ, they start again with the name.
+            if (button.dataset.name === 'coursekind' && changed) {
+                applyKind(state);
+                if (button.dataset.step !== '' && Number(button.dataset.step) !== state.current) {
+                    state.current = 1;
+                    state.reached = 1;
+                    state.decided = false;
+                    state.skipped.clear();
+                    show(state, true);
+                    return;
+                }
+            }
             // In the history only the value changes, the dialog stays at the current step.
             if (button.dataset.step !== '' && Number(button.dataset.step) !== state.current) {
                 show(state, false);

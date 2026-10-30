@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/course/edit_form.php');
 
+use local_coursewizard\local\events;
 use local_coursewizard\local\templates;
 
 /**
@@ -40,13 +41,27 @@ use local_coursewizard\local\templates;
 class course_form extends \course_edit_form {
     /** @var array Dialog steps in order: step key => form elements shown in that step. */
     public const STEPS = [
+        'kind' => ['coursekind'],
         'fullname' => ['fullname'],
         'category' => ['category'],
+        'eventdate' => ['eventstart', 'eventend'],
+        'capacity' => ['eventcapacity'],
         'dates' => ['startdate', 'enddate'],
         'summary' => ['summary_editor'],
         'image' => ['overviewfiles_filemanager'],
         'visible' => ['visible'],
     ];
+
+    /** @var array Steps only for a course or only for an event course: step key => kind. */
+    public const KINDSTEPS = [
+        'eventdate' => 'event',
+        'capacity' => 'event',
+        'dates' => 'course',
+        'visible' => 'course',
+    ];
+
+    /** @var array Steps that always need an answer, besides steps with a required field. */
+    public const REQUIREDSTEPS = ['kind', 'eventdate'];
 
     /** @var array Steps that are only asked if enabled in the plugin settings: step key => setting. */
     public const OPTIONALSTEPS = [
@@ -55,11 +70,18 @@ class course_form extends \course_edit_form {
 
     /** @var array Selects answered with buttons in the chat instead of a dropdown: element => option value => icon. */
     public const CHOICES = [
+        'coursekind' => ['course' => 'fa-book-open', 'event' => 'fa-calendar'],
         'visible' => ['1' => 'fa-eye', '0' => 'fa-eye-slash'],
     ];
 
+    /** @var array Choices shown as large cards instead of buttons. */
+    public const CARDS = ['coursekind'];
+
     /** @var array Course templates offered in the dialog, see templates::get_courses(). */
     protected $templates = [];
+
+    /** @var bool Event courses can be created, see events::is_available(). */
+    protected $events = false;
 
     /** @var array Elements the dialog fills in itself and never shows. */
     public const AUTOMATIC = ['shortname'];
@@ -96,11 +118,53 @@ class course_form extends \course_edit_form {
             foreach ($this->templates as $template) {
                 $options[$template->id] = $template->fullname;
             }
-            $element = $mform->createElement('select', 'templateid', get_string('template', 'local_coursewizard'), $options);
-            $mform->insertElementBefore($element, 'buttonar');
+            $this->add_element('select', 'templateid', get_string('template', 'local_coursewizard'), $options);
             $mform->setType('templateid', PARAM_INT);
             $mform->setDefault('templateid', 0);
         }
+
+        // Course or event course (sessions of mod_facetoface), only if event courses can be created.
+        $this->events = events::is_available(\context_coursecat::instance($this->_customdata['category']->id));
+        if ($this->events) {
+            $kinds = ['course' => get_string('kindcourse', 'local_coursewizard'),
+                'event' => get_string('kindevent', 'local_coursewizard')];
+            $this->add_element('select', 'coursekind', get_string('kind', 'local_coursewizard'), $kinds);
+            $mform->setDefault('coursekind', 'course');
+
+            // The first session: tomorrow morning, can be changed.
+            $start = usergetmidnight(time() + DAYSECS) + 9 * HOURSECS;
+            $this->add_element('date_time_selector', 'eventstart', get_string('eventstart', 'local_coursewizard'));
+            $mform->setDefault('eventstart', $start);
+            $this->add_element('date_time_selector', 'eventend', get_string('eventend', 'local_coursewizard'));
+            $mform->setDefault('eventend', $start + 3 * HOURSECS);
+            $this->add_element('text', 'eventcapacity', get_string('eventcapacity', 'local_coursewizard'), ['size' => 5]);
+            $mform->setType('eventcapacity', PARAM_INT);
+            $mform->setDefault('eventcapacity', events::CAPACITY);
+        }
+    }
+
+    /**
+     * Adds an element of the dialog before Moodle's buttons.
+     *
+     * @param string $type Element type.
+     * @param string $name Element name.
+     * @param string $label
+     * @param mixed $options Options or attributes, as for createElement().
+     */
+    protected function add_element(string $type, string $name, string $label, $options = null): void {
+        $mform = $this->_form;
+        $mform->insertElementBefore($mform->createElement($type, $name, $label, $options), 'buttonar');
+    }
+
+    /**
+     * Whether the new course is an event course.
+     *
+     * @param array|\stdClass $data Submitted data.
+     * @return bool
+     */
+    public function is_event($data): bool {
+        $data = (array) $data;
+        return $this->events && ($data['coursekind'] ?? '') === 'event';
     }
 
     /**
@@ -114,6 +178,14 @@ class course_form extends \course_edit_form {
         $errors = parent::validation($data, $files);
         if (!empty($data['templateid']) && !in_array((int) $data['templateid'], array_column($this->templates, 'id'))) {
             $errors['templateid'] = get_string('invaliddata', 'error');
+        }
+        if ($this->is_event($data)) {
+            if ((int) $data['eventend'] <= (int) $data['eventstart']) {
+                $errors['eventend'] = get_string('eventendbeforestart', 'local_coursewizard');
+            }
+            if ((int) $data['eventcapacity'] < 1) {
+                $errors['eventcapacity'] = get_string('eventcapacitymin', 'local_coursewizard');
+            }
         }
         return $errors;
     }
@@ -214,7 +286,10 @@ class course_form extends \course_edit_form {
 
         // Steps with a required field first: after them the course can be created right away.
         foreach ($steps as &$step) {
-            $step['required'] = (bool) array_filter($step['elements'], fn($element) => $element['requiredmessage'] !== '');
+            $step['required'] = in_array($step['key'], self::REQUIREDSTEPS) ||
+                (bool) array_filter($step['elements'], fn($element) => $element['requiredmessage'] !== '');
+            // Only for a course or only for an event course, the dialog leaves out the others.
+            $step['kind'] = self::KINDSTEPS[$step['key']] ?? '';
             // Shown on request ("What is this for?") below the question.
             $step['explanation'] = get_string('explain_' . $step['key'], 'local_coursewizard');
         }
@@ -279,6 +354,7 @@ class course_form extends \course_edit_form {
                 $element['choices'] = array_values(
                     array_intersect_key(array_replace(self::CHOICES[$name], $choices), $choices) + $choices
                 );
+                $element['cards'] = in_array($name, self::CARDS);
             }
             if ($mform->isElementRequired($name)) {
                 $element['requiredmessage'] = get_string('required');

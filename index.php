@@ -29,6 +29,7 @@ require_once($CFG->dirroot . '/course/lib.php');
 require_once($CFG->dirroot . '/course/edit_form.php');
 
 use local_coursewizard\form\course_form;
+use local_coursewizard\local\events;
 use local_coursewizard\local\templates;
 
 $categoryid = optional_param('category', 0, PARAM_INT);
@@ -71,6 +72,14 @@ $editform->set_display_vertical();
 if ($editform->is_cancelled()) {
     redirect($returnurl);
 } else if ($data = $editform->get_data()) {
+    // An event course is visible, has no template and opens its face-to-face activity (format single activity).
+    $isevent = $editform->is_event($data);
+    if ($isevent) {
+        $data->visible = 1;
+        $data->templateid = 0;
+        $data->format = events::FORMAT;
+        $data->activitytype = 'facetoface';
+    }
     $course = create_course($data, $editoroptions);
 
     // Enrol the creator like course/edit.php does.
@@ -85,6 +94,15 @@ if ($editform->is_cancelled()) {
     }
 
     $courseurl = new moodle_url('/course/view.php', ['id' => $course->id]);
+    if ($isevent) {
+        events::create($course, (int) $data->eventstart, (int) $data->eventend, (int) $data->eventcapacity);
+        redirect(
+            $courseurl,
+            get_string('eventcreated', 'local_coursewizard', format_string($course->fullname)),
+            null,
+            \core\output\notification::NOTIFY_SUCCESS
+        );
+    }
     if (empty($data->templateid)) {
         redirect($courseurl);
     }
@@ -104,18 +122,22 @@ $PAGE->set_heading(format_string($category->name));
 
 $config = $editform->get_wizard_config();
 $config['done'] = get_string('step_done', 'local_coursewizard', $USER->firstname);
-// After the required steps the dialog offers to create the course or to add the optional details.
-$details = [];
-foreach ($config['steps'] as $step) {
-    if (!$step['required']) {
-        $details = array_merge($details, array_column($step['elements'], 'label'));
+// After the required steps the dialog offers to create the course or to add the optional details,
+// named for a course and for an event course (their optional steps differ).
+$config['decision'] = [];
+foreach (['course', 'event'] as $kind) {
+    $details = [];
+    foreach ($config['steps'] as $step) {
+        if (!$step['required'] && in_array($step['kind'], ['', $kind])) {
+            $details = array_merge($details, array_column($step['elements'], 'label'));
+        }
     }
+    $config['decision'][$kind] = get_string(
+        'decision',
+        'local_coursewizard',
+        (object) ['name' => $USER->firstname, 'details' => implode(', ', array_filter($details))]
+    );
 }
-$config['decision'] = get_string(
-    'decision',
-    'local_coursewizard',
-    (object) ['name' => $USER->firstname, 'details' => implode(', ', array_filter($details))]
-);
 $config['strings'] = [
     'later' => get_string('later', 'local_coursewizard'),
     'imagefromtemplate' => get_string('imagefromtemplate', 'local_coursewizard'),

@@ -20,6 +20,14 @@ If [local_coursetemplatewizard](https://github.com/oncampus/moodle-local_courset
 
 The question is only shown to users who may use templates (`local/coursetemplatewizard:use` in the category, or for the role a creator gets in the new course). Without that plugin, the dialog works as before.
 
+## Event courses (optional)
+
+If mod_facetoface (cometas-events) is installed and the guest enrolment method is enabled (without required password), the dialog first asks "What would you like to create?" with the cards "Course" and "Event". An event course is a course that only offers a session to sign up for, as block_course_explorer lists it under "Events": guest access without password and a visible face-to-face activity.
+
+For an event, the dialog asks for name, category and the date of the first session (start and end, required), optionally places (default 10), description and image; visibility is always "show" and there are no templates. On creation it sets the course format "single activity" (the course opens the face-to-face activity), enables guest access without password, adds the face-to-face activity with the defaults of its form (description = course description) and the first session. Further sessions are added later in the activity.
+
+The choice is only offered to users who may configure guest access and add face-to-face activities and sessions (in the category or with the role a creator gets in the new course).
+
 ## Settings
 
 Site administration → Plugins → Local plugins → Course wizard:

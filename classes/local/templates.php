@@ -52,8 +52,7 @@ class templates {
     /**
      * Returns the template courses the current user may use for a new course in a category.
      *
-     * The capability is checked in the category, or for the role the creator gets in the new
-     * course (course creators usually have it only there, as teacher).
+     * The capability is checked as for the creator of the new course (see creator::can()).
      *
      * @param \context $context Context of the category of the new course.
      * @return array Objects with id, fullname, image (URL, the pattern if there is none), courseimage
@@ -61,15 +60,13 @@ class templates {
      *     (HTML to prefill the description, can be changed in the dialog).
      */
     public static function get_courses(\context $context): array {
-        global $CFG, $DB;
+        global $DB;
 
         $categoryid = self::get_categoryid();
         if (!$categoryid) {
             return [];
         }
-        $allowed = has_capability(self::CAPABILITY, $context) || (!empty($CFG->creatornewroleid) &&
-            $DB->record_exists('role_capabilities', ['roleid' => $CFG->creatornewroleid, 'capability' => self::CAPABILITY,
-                'permission' => CAP_ALLOW, 'contextid' => \context_system::instance()->id]));
+        $allowed = creator::can(self::CAPABILITY, $context);
         if (!$allowed) {
             return [];
         }
