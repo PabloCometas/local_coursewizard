@@ -203,8 +203,8 @@ const showChoices = async(state, element) => {
 };
 
 /**
- * Chooses a template (or none: '0') and prefills the description with the one of the template.
- * A description written in the dialog is never replaced.
+ * Chooses a template (or none: '0') and prefills course name and description with those of the
+ * template, as a suggestion. A name or description written in the dialog is never replaced.
  *
  * @param {Object} state
  * @param {string} value Id of the template course, '0' for an empty course.
@@ -212,6 +212,16 @@ const showChoices = async(state, element) => {
 const chooseTemplate = (state, value) => {
     state.form.elements.templateid.value = value;
     const template = state.config.templates.find((choice) => choice.value === value);
+    const fullname = state.form.elements.fullname;
+    if (fullname && (fullname.value.trim() === '' || fullname.value === state.prefilledname)) {
+        fullname.value = template ? htmlToText(template.label) : '';
+        state.prefilledname = fullname.value;
+        // Still at the name question: select the suggestion, typing replaces it.
+        if (getItem('fullname')?.classList.contains(ACTIVE)) {
+            fullname.focus();
+            fullname.select();
+        }
+    }
     const summary = template ? template.summary : '';
     const editor = getInstanceForElementId('id_summary_editor');
     const textarea = state.form.elements['summary_editor[text]'];
@@ -367,6 +377,10 @@ const show = async(state, focus) => {
             .find((node) => node.offsetParent !== null);
         if (field) {
             field.focus();
+            // A suggested name (from the template) is selected: typing replaces it, Enter keeps it.
+            if (field.name === 'fullname' && field.value !== '' && field.value === state.prefilledname) {
+                field.select();
+            }
         }
         items[0].scrollIntoView({block: 'nearest', behavior: 'smooth'});
     }
@@ -494,7 +508,8 @@ export const init = (selector) => {
     state.reached = state.current;
     // Step just answered, its answer slides in (null: "more details" chosen).
     state.answered = null;
-    // Description prefilled from a template, replaced when another template is chosen.
+    // Name and description prefilled from a template, replaced when another template is chosen.
+    state.prefilledname = '';
     state.prefilled = '';
     // Steps whose explanation was asked for, it stays in the history.
     state.explained = new Set();

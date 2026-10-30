@@ -49,7 +49,8 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_secondary_navigation(false);
 $PAGE->add_body_class('local-coursewizard-page');
 
-$returnurl = new moodle_url('/course/index.php', ['categoryid' => $category->id]);
+// "Cancel" leads back to the Dashboard, where creating a course usually starts.
+$returnurl = new moodle_url('/my/');
 
 $editoroptions = ['maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $CFG->maxbytes, 'trusttext' => false,
     'noclean' => true, 'context' => $catcontext, 'subdirs' => 0];
