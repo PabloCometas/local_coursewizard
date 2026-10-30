@@ -1,27 +1,39 @@
-# local_coursewizard – Kursassistent
+# local_coursewizard – Course wizard
 
-Moodle-Plugin von cometas (Moodle 4.5+, vorbereitet für 5.x). Ersetzt das Moodle-Formular «Neuer Kurs» durch einen geführten Dialog: Der Assistent fragt die Angaben Schritt für Schritt ab und legt am Schluss einen ganz normalen Moodle-Kurs an.
+Moodle plugin by cometas (Moodle 4.5+, prepared for 5.x). Replaces Moodle's "Add a new course" form with a guided, chat-like dialog: the wizard asks for the details step by step and finally creates an ordinary Moodle course.
 
-Aufruf: `local/coursewizard/index.php?category=<id>`. Das Moodle-Formular «Neuer Kurs» wird noch nicht umgeleitet.
+URL: `local/coursewizard/index.php?category=<id>`. Moodle's "Add a new course" form is not redirected yet.
 
-## Ablauf
+## How it works
 
-Der Dialog begrüsst die Person mit Vornamen und fragt nacheinander: Kursname, Kategorie, Start und Ende, Beschreibung, Kursbild, Sichtbarkeit. Nicht ausgefüllte Angaben behalten die Standardwerte der Plattform. Verlangt die Plattform weitere Pflichtfelder (z. B. Kursfelder), folgt ein zusätzlicher Schritt. Am Schluss legt «Neuen Kurs anlegen» den Kurs an.
+The dialog greets the user by first name and asks the required questions first: course name and category. After that, a green box offers to open the course right away or to add more details. Optional steps follow: description, course image and visibility, plus start and end date if enabled (see settings). Each optional step can be skipped with "Later". From the first optional step on, a bar at the bottom of the screen offers "Open course" at any time. If the site requires further fields (e.g. custom course fields), an extra step asks for them. Fields that are not filled in keep the site defaults.
 
-Der Kurzname wird nie abgefragt: Er entsteht aus dem Kursnamen, ist er vergeben, wird « 2», « 3» … angehängt.
+Every question has a "What is this for?" button that explains where the information is used, e.g. where the course name appears or which aspect ratio suits the course image.
 
-Technisch läuft unter dem Dialog Moodles eigenes Kursformular (`classes/form/course_form.php`), der Dialog zeigt jeweils nur die Felder eines Schritts. Prüfung und Speichern sind dieselben wie bei `course/edit.php`.
+The short name is never asked: it is derived from the course name, and if it is taken, " 2", " 3" … is appended.
 
-## Rechte
+Technically, Moodle's own course form runs underneath the dialog (`classes/form/course_form.php`), and the dialog only shows the fields of the current step. Validation and saving are the same as in `course/edit.php`.
 
-Wer den Assistenten nutzt, braucht wie beim Moodle-Formular das Recht `moodle/course:create` in der Kurskategorie.
+## Settings
 
-## Grundsätze
+Site administration → Plugins → Local plugins → Course wizard:
 
-- Baut nur auf Moodle auf (Kursformular und `create_course()`), keine Abhängigkeit zu anderen cometas-Plugins.
-- Keine eigenen Datenbanktabellen, das Plugin legt nur normale Kurse an.
-- Später möglich: Übernahme in `local_courseadmin`, KI-Vorschläge für einzelne Antworten.
+- **Ask for course start and end date** (`local_coursewizard/askdates`, default off): only useful for courses with a fixed term, e.g. at universities.
 
-## JavaScript bauen
+## Capabilities
 
-`amd/src` → `amd/build` mit Moodles Grunt, lokal über `moodle-dev/js-build.sh coursewizard`. `amd/build` wird mitcommittet.
+Like Moodle's form, the wizard requires `moodle/course:create` in the course category.
+
+## Languages
+
+English and German (informal "du"). All texts are language strings in `lang/`.
+
+## Principles
+
+- Builds on Moodle core only (course form and `create_course()`), no dependency on other cometas plugins.
+- No database tables of its own, the plugin only creates ordinary courses.
+- Possible later: merge into `local_courseadmin`, AI suggestions for single answers.
+
+## Building JavaScript
+
+`amd/src` → `amd/build` with Moodle's Grunt, locally via `moodle-dev/js-build.sh coursewizard eslint:amd rollup`. `amd/build` is committed.
