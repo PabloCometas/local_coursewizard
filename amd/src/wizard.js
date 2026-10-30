@@ -26,7 +26,6 @@
  */
 
 import Templates from 'core/templates';
-import {getString} from 'core/str';
 import {getInstanceForElementId} from 'editor_tiny/editor';
 
 const ACTIVE = 'coursewizard-active';
@@ -177,11 +176,6 @@ const show = async(state, focus) => {
     const {html, js} = await Templates.renderForPromise('local_coursewizard/history', context);
     Templates.replaceNodeContents(state.history, html, js);
 
-    const total = steps.length;
-    const position = Math.min(state.current + 1, total);
-    state.progresstext.textContent = await getString('progress', 'local_coursewizard', {current: position, total: total});
-    state.progressbar.style.width = Math.round((isdone ? total : state.current) / total * 100) + '%';
-
     state.form.querySelectorAll('.' + ACTIVE).forEach((node) => node.classList.remove(ACTIVE));
     let names = isdone ? ['buttonar'] : steps[state.current].elements.map((element) => element.name);
     if (atdecision) {
@@ -294,8 +288,6 @@ export const init = (selector) => {
         history: root.querySelector('[data-region="history"]'),
         nav: root.querySelector('[data-region="nav"]'),
         back: root.querySelector('[data-action="back"]'),
-        progresstext: root.querySelector('[data-region="progresstext"]'),
-        progressbar: root.querySelector('[data-region="progressbar"]'),
         createnow: root.querySelector('[data-region="createnow"]'),
         input: root.querySelector('[data-region="input"]'),
         current: config.errorstep === null ? 0 : config.errorstep,

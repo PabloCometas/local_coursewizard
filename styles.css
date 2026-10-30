@@ -21,33 +21,6 @@
     border-radius: 1rem;
 }
 
-.coursewizard-progress {
-    margin-bottom: 1.5rem;
-}
-
-.coursewizard-progress-text {
-    display: block;
-    margin-bottom: 0.375rem;
-    color: var(--coursewizard-muted);
-    font-size: 0.8125rem;
-    text-align: right;
-}
-
-.coursewizard-progress-track {
-    height: 3px;
-    overflow: hidden;
-    background-color: var(--coursewizard-soft);
-    border-radius: 3px;
-}
-
-.coursewizard-progress-bar {
-    width: 0;
-    height: 100%;
-    background-color: var(--primary, #0f6cbf);
-    border-radius: 3px;
-    transition: width 0.3s ease;
-}
-
 /* Assistant: small avatar, text without bubble. */
 .coursewizard-bot {
     display: flex;
@@ -322,8 +295,7 @@
 /* ==================== Moodle course form: only the current step ==================== */
 
 /* Without JavaScript the full Moodle form stays usable. */
-.coursewizard:not(.coursewizard-ready) .coursewizard-nav,
-.coursewizard:not(.coursewizard-ready) .coursewizard-progress {
+.coursewizard:not(.coursewizard-ready) .coursewizard-nav {
     display: none;
 }
 

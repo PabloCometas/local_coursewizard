@@ -76,11 +76,11 @@ class course_form extends \course_edit_form {
             $mform->getElement('fullname')->setLabel(get_string('coursename', 'local_coursewizard'));
         }
 
-        // The last step of the dialog creates the course.
+        // The last step of the dialog creates and opens the course, same label as everywhere in the dialog.
         if ($mform->elementExists('buttonar')) {
             foreach ($mform->getElement('buttonar')->getElements() as $button) {
                 if ($button->getName() === 'saveanddisplay') {
-                    $button->setValue(get_string('addnewcourse'));
+                    $button->setValue(get_string('createnow', 'local_coursewizard'));
                 }
             }
         }

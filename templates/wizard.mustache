@@ -17,7 +17,7 @@
 {{!
     @template local_coursewizard/wizard
 
-    Guided course creation dialog: progress, chat history, Moodle's course form
+    Guided course creation dialog: chat history, Moodle's course form
     (only the fields of the current step are shown) in a chat-style input box,
     and, once all required steps are answered, a bar sticking to the bottom of
     the screen to create the course right away.
@@ -36,10 +36,6 @@
 }}
 <div id="local-coursewizard" class="coursewizard" data-config="{{config}}">
     <div class="coursewizard-frame">
-        <div class="coursewizard-progress">
-            <span class="coursewizard-progress-text" data-region="progresstext"></span>
-            <div class="coursewizard-progress-track"><div class="coursewizard-progress-bar" data-region="progressbar"></div></div>
-        </div>
         {{#greeting}}{{> local_coursewizard/bot_message }}{{/greeting}}
         <div data-region="history" aria-live="polite"></div>
         <div class="coursewizard-input" data-region="input">
