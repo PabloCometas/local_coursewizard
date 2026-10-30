@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['classicform'] = 'Use the classic form instead';
+$string['coursename'] = 'Course name';
 $string['greeting'] = 'Hi {$a}! I will help you create a new course, step by step.';
 $string['pluginname'] = 'Course wizard';
 $string['privacy:metadata'] = 'The Course wizard plugin does not store any personal data.';

@@ -66,6 +66,11 @@ class course_form extends \course_edit_form {
             $mform->_submitValues['shortname'] = self::unique_shortname((string) $mform->getSubmitValue('fullname'));
         }
 
+        // Without a short name to tell apart, "Course full name" is needlessly long.
+        if ($mform->elementExists('fullname')) {
+            $mform->getElement('fullname')->setLabel(get_string('coursename', 'local_coursewizard'));
+        }
+
         // The last step of the dialog creates the course.
         if ($mform->elementExists('buttonar')) {
             foreach ($mform->getElement('buttonar')->getElements() as $button) {

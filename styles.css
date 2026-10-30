@@ -67,13 +67,14 @@
     visibility: hidden;
 }
 
-.coursewizard-ready .coursewizard-form fieldset {
+.coursewizard-ready .coursewizard-form > fieldset {
     margin: 0;
     padding: 0;
     border: 0;
 }
 
-.coursewizard-ready .coursewizard-form fieldset > legend + .d-flex,
+/* Section headers only: groups like the date selector use the same markup inside .felement. */
+.coursewizard-ready .coursewizard-form > fieldset > legend + .d-flex,
 .coursewizard-ready .coursewizard-form .collapsible-actions,
 .coursewizard-ready .coursewizard-form .fdescription.required {
     display: none !important; /* Moodle's header uses .d-flex. */

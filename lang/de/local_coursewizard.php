@@ -25,6 +25,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['classicform'] = 'Lieber das klassische Formular verwenden';
+$string['coursename'] = 'Kursname';
 $string['greeting'] = 'Hallo {$a}! Ich helfe dir, Schritt für Schritt einen neuen Kurs anzulegen.';
 $string['pluginname'] = 'Kursassistent';
 $string['privacy:metadata'] = 'Das Plugin Kursassistent speichert keine personenbezogenen Daten.';
