@@ -173,7 +173,6 @@ const show = async(state, focus) => {
             } : null,
         })),
         question: atdecision ? '' : (isdone ? state.config.done : steps[state.current].question),
-        later: !isdone && !atdecision && !steps[state.current].required,
     };
     const {html, js} = await Templates.renderForPromise('local_coursewizard/history', context);
     Templates.replaceNodeContents(state.history, html, js);
@@ -206,6 +205,7 @@ const show = async(state, focus) => {
     state.input.hidden = atdecision;
     state.back.hidden = state.current === 0;
     state.nav.hidden = isdone;
+    state.nav.querySelector('[data-action="later"]').hidden = isdone || atdecision || steps[state.current].required;
     // Visible on every optional step, so it is always clear the course can be created now.
     state.createnow.hidden = !hasoptional || isdone || atdecision || state.current <= state.lastrequired;
 

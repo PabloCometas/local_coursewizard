@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['askdates'] = 'Ask for course start and end date';
 $string['askdates_desc'] = 'The wizard asks for the course start and end date. Useful for courses with a fixed term or period (e.g. universities). If disabled, the site defaults apply (Site administration → Courses → Default settings).';
 $string['coursename'] = 'Course name';
-$string['createnow'] = 'Create course now';
+$string['createnow'] = 'Open course';
 $string['decision'] = 'Thanks, {$a->name}! You have entered everything needed and can create the course now. Would you like to add more details, such as {$a->details}?';
 $string['greeting'] = 'Hi {$a}! I will help you create a new course, step by step.';
 $string['later'] = 'Later';

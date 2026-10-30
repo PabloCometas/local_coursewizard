@@ -19,14 +19,12 @@
 
     Chat history of the guided course creation dialog: answered steps with their
     answers, after the last required step the offer to create the course right
-    away, then the question of the current step (with the "Later" chip if the
-    step is optional).
+    away, then the question of the current step.
 
     Context variables required for this template:
     * answered - Answered steps: index, question, answer, decision (after the last
       required step, otherwise null): text, decided (more details chosen), answer.
     * question - Question of the current step, empty while the decision is open.
-    * later - Whether the current step can be skipped.
 
     Example context (json):
     {
@@ -42,8 +40,7 @@
                 }
             }
         ],
-        "question": "",
-        "later": false
+        "question": ""
     }
 }}
 {{#answered}}
@@ -80,8 +77,3 @@
     {{/decision}}
 {{/answered}}
 {{#question}}{{> local_coursewizard/bot_message }}{{/question}}
-{{#later}}
-    <div class="coursewizard-chips">
-        <button type="button" class="coursewizard-chip" data-action="later">{{#str}}later, local_coursewizard{{/str}}</button>
-    </div>
-{{/later}}

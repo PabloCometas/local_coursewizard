@@ -45,6 +45,9 @@
         <div class="coursewizard-input" data-region="input">
             {{{form}}}
             <div class="coursewizard-nav" data-region="nav">
+                <button type="button" class="btn btn-light coursewizard-later" data-action="later" hidden>
+                    {{#str}}later, local_coursewizard{{/str}}
+                </button>
                 <button type="button" class="btn btn-primary coursewizard-send" data-action="next" title="{{#str}}next{{/str}}">
                     <span class="coursewizard-send-label">{{#str}}next{{/str}}</span>
                     <i class="icon fa fa-arrow-right fa-fw m-0 coursewizard-send-next" aria-hidden="true"></i>

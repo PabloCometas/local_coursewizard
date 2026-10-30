@@ -145,28 +145,6 @@
     border: 1px solid #d5d9de;
 }
 
-/* "Later" and similar quick answers below the question. */
-.coursewizard-chips {
-    display: flex;
-    flex-wrap: wrap;
-    margin: -0.25rem 0 1rem 2.5rem;
-}
-
-.coursewizard-chip {
-    margin: 0 0.5rem 0.5rem 0;
-    padding: 0.3rem 0.875rem;
-    color: inherit;
-    font-size: 0.8125rem;
-    background-color: #fff;
-    border: 1px solid var(--coursewizard-border);
-    border-radius: 999px;
-}
-
-.coursewizard-chip:hover,
-.coursewizard-chip:focus {
-    background-color: var(--coursewizard-soft);
-}
-
 /* Input box: fields of the step, below them a labelled "Next" button. */
 .coursewizard-input {
     display: flex;
@@ -198,9 +176,23 @@
 }
 
 .coursewizard-nav {
+    display: flex;
     flex: 0 0 auto;
     align-self: flex-end;
     margin-top: 0.75rem;
+}
+
+/* Optional steps: "Later" next to "Next". */
+.coursewizard-nav .coursewizard-later {
+    margin-right: 0.5rem;
+    padding: 0.4rem 1rem;
+    background-color: #fff;
+    border: 1px solid #d5d9de;
+    border-radius: 999px;
+}
+
+.coursewizard-nav .coursewizard-later[hidden] {
+    display: none;
 }
 
 .coursewizard-nav .coursewizard-send {

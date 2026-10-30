@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['askdates'] = 'Kursbeginn und Kursende abfragen';
 $string['askdates_desc'] = 'Der Assistent fragt nach Kursbeginn und Kursende. Sinnvoll für Kurse mit festem Semester oder Zeitraum (z. B. Hochschulen). Ist die Option aus, gelten die Standardwerte der Plattform (Website-Administration → Kurse → Standardeinstellungen).';
 $string['coursename'] = 'Kursname';
-$string['createnow'] = 'Kurs jetzt anlegen';
+$string['createnow'] = 'Kurs öffnen';
 $string['decision'] = 'Danke, {$a->name}! Du hast alles Nötige angegeben und kannst den Kurs jetzt anlegen. Möchtest du noch weitere Angaben machen, zum Beispiel {$a->details}?';
 $string['greeting'] = 'Hallo {$a}! Ich helfe dir, Schritt für Schritt einen neuen Kurs anzulegen.';
 $string['later'] = 'Später';
