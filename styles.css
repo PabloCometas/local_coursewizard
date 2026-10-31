@@ -775,9 +775,13 @@
     display: none;
 }
 
-/* With JavaScript, hide the full form until the dialog has started. */
-.jsenabled .coursewizard:not(.coursewizard-ready) .coursewizard-input {
+/* With JavaScript, hide the full form until the dialog has started, also its height (the frame would
+   be as tall as the whole form for a moment). Not display: none, the editor must be laid out. */
+.jsenabled .coursewizard:not(.coursewizard-ready) .coursewizard-input,
+.jsenabled .coursewizard:not(.coursewizard-ready) .coursewizard-footer {
     visibility: hidden;
+    height: 0;
+    overflow: hidden;
 }
 
 .coursewizard-ready .coursewizard-form > fieldset {
